@@ -1,0 +1,10 @@
+%p                 : 216766416169603
+%q                 : 255033693964561
+3n                 : 55282739843193198580847439283
+3t                 : 55282739843192726780737305120
+3e                 : 55282739843192726780737305109
+3d                 : 50257036221084297073397550109
+isCoPrime e and t : true
+plainMessage      : morpheus
+*encryptedMessage  : AIE8WZeYghcf6Xw7dg==
+decryptedMessage  : morpheus
