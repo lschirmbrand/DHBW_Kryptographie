@@ -39,4 +39,11 @@ public enum Configuration {
     public final String logsDirectory = userDirectory + fileSeparator + "log";
 
 
+    public void enableLogging(){
+
+    }
+
+    public void disableLogging(){
+
+    }
 }
