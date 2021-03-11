@@ -19,7 +19,7 @@ public class GUI {
 
     private Controller guiController;
 
-    public void startUp(Stage mainStage){
+    public void start(Stage mainStage){
 
         guiController = new Controller(this);
 
