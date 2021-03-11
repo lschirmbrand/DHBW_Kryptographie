@@ -1,5 +1,5 @@
 package configuration;
 
-public enum EncryptionType {
+public enum AlgorithmType {
     SHIFTBASE, RSABASE, SHIFTCRACKER, RSACRACKER
 }
