@@ -1,98 +1,97 @@
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.util.Base64;
+import java.util.Scanner;
+
+//-------------------
+//  Author: 4775194
+//-------------------
 
 public class RSABase {
-    // static instance
-    private static final RSABase instance = new RSABase();
-
-    // port
+    private static RSABase instance = new RSABase();
     public Port port;
+    private Key key;
 
-    int key;
-    String plainMessage;
-    String encryptedMessage;
-
-    // private constructor
     private RSABase() {
         port = new Port();
     }
 
-    // static method getInstance
     public static RSABase getInstance() {
         return instance;
     }
 
-    // inner methods
-    public String innerVersion() {
-        return "RSABase";
+    private String encryptMessage(String plainMessage, File publicKeyfile) throws FileNotFoundException {
+        readPublicKeyFile(publicKeyfile);
+
+        byte[] bytes = plainMessage.getBytes(Charset.defaultCharset());
+        byte[] encrypted = crypt(new BigInteger(bytes), key).toByteArray();
+        return Base64.getEncoder().encodeToString(encrypted);
     }
 
+    private String decryptMessage(String encryptedMessage, File privateKeyfile) throws FileNotFoundException {
+        readPrivateKeyFile(privateKeyfile);
 
-    //Encrypt Message with Key from JSON File
-    private String innerEncrypt(String plainMessage, File keyfile){
-        this.key = readJsonFile(keyfile);
+        byte[] cipher = Base64.getDecoder().decode(encryptedMessage);
+        byte[] msg = crypt(new BigInteger(cipher), key).toByteArray();
+        return new String(msg);
+    }
 
-        StringBuilder stringBuilder = new StringBuilder();
+    private BigInteger crypt(BigInteger message, Key key) {
+        return message.modPow(key.getE(), key.getN());
+    }
 
-        for(int i = 0; i< plainMessage.length(); i++){
-            char character = (char) (plainMessage.codePointAt(i) + key);
-            stringBuilder.append(character);
+    private void readPrivateKeyFile(File keyfile) throws FileNotFoundException {
+        readKeyFromFile(keyfile, "d");
+    }
+
+    private void readPublicKeyFile(File keyfile) throws FileNotFoundException {
+        readKeyFromFile(keyfile);
+    }
+
+    private void readKeyFromFile(File keyfile) throws FileNotFoundException {
+        readKeyFromFile(keyfile, "e");
+    }
+
+    private void readKeyFromFile(File keyfile, String eReplacement) throws FileNotFoundException {
+        BigInteger n = null;
+        BigInteger e = null;
+
+        Scanner scanner = new Scanner(keyfile);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            if (line.contains("\"n\":")) {
+                n = getParameter(line);
+            } else if (line.contains("\"" + eReplacement + "\":")) {
+                e = getParameter(line);
+            }
         }
 
-        return stringBuilder.toString();
+        this.key = new Key(n, e);
     }
 
-    //Decrypt Message with Key from JSON File
-    private String innerDecrypt(String encryptedMessage, File keyfile){
-        this.key = readJsonFile(keyfile);
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (int i = 0; i < encryptedMessage.length(); i++) {
-            char character = (char) (encryptedMessage.codePointAt(i) - key);
-            stringBuilder.append(character);
-        }
-
-        return stringBuilder.toString();
+    private BigInteger getParameter(String input) {
+        String[] lineParts = input.split(":");
+        String line = lineParts[1];
+        line = line.replace(",", "").trim();
+        return new BigInteger(line);
     }
 
-
-    //Read JSON File into Integer Key
-    private int readJsonFile(File keyfile){
-        int key;
-        try{
-            FileReader reader = new FileReader(keyfile);
-            JSONParser jsonParser = new JSONParser();
-
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-            key = Integer.parseInt(jsonObject.get("key").toString());
-
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-
-        return key;
-    }
-
-
-    // inner class port
     public class Port implements IRSABase {
         @Override
         public String version() {
-            return innerVersion();
+            return null;
         }
 
         @Override
-        public String encrypt(String plainMessage, File keyfile) {
-            return innerDecrypt(plainMessage, keyfile);
+        public String encrypt(String plainMessage, File publicKeyfile) throws FileNotFoundException {
+            return encryptMessage(plainMessage, publicKeyfile);
         }
 
         @Override
-        public String decrypt(String encryptedMessage, File keyfile) {
-            return innerEncrypt(encryptedMessage, keyfile);
+        public String decrypt(String encryptedMessage, File privateKeyfile) throws FileNotFoundException {
+            return decryptMessage(encryptedMessage, privateKeyfile);
         }
     }
 }
