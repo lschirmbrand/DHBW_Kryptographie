@@ -29,3 +29,27 @@ gui/GUI.java
  gui.GUI$1
 Application.java
  Application
+commands/EncryptMessageCommand.java
+ commands.EncryptMessageCommand
+commands/RegisterParticipantCommand.java
+ commands.RegisterParticipantCommand
+commands/DecryptMessageCommand.java
+ commands.DecryptMessageCommand
+commands/DropChannelCommand.java
+ commands.DropChannelCommand
+commands/CreateChannelCommand.java
+ commands.CreateChannelCommand
+commands/ShowChannelCommand.java
+ commands.ShowChannelCommand
+commands/ICommand.java
+ commands.ICommand
+commands/SendMessageCommand.java
+ commands.SendMessageCommand
+commands/CrackMessageCommand.java
+ commands.CrackMessageCommand
+commands/CommandUtil.java
+ commands.CommandUtil
+commands/IntruderChannelCommand.java
+ commands.IntruderChannelCommand
+commands/ShowAlgorithmCommand.java
+ commands.ShowAlgorithmCommand
