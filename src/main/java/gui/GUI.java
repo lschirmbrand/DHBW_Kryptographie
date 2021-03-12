@@ -1,6 +1,7 @@
 package gui;
 
 import configuration.Configuration;
+import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -12,33 +13,40 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
-public class GUI {
+public class GUI extends Application {
 
     TextArea outputArea;
     TextArea inputArea;
 
     private Controller guiController;
 
-    public void start(Stage mainStage){
+    public void start(Stage primaryStage) {
 
         guiController = new Controller(this);
 
-        mainStage.setTitle("Name to be done");
+        primaryStage.setTitle("MSA | Mergentheim/Mosbach Security Agency");
 
         HBox hBox = new HBox();
-        hBox.setPadding(new Insets(20, 15, 20, 15));
-        hBox.setSpacing(15);
-        hBox.setStyle("-fx-background-color: #62e77d");
+        hBox.setPadding(new Insets(15, 12, 15, 12));
+        hBox.setSpacing(10);
+        hBox.setStyle("-fx-background-color: #336699;");
 
-        Button btnExecute = new Button("Execute");
-        btnExecute.setPrefSize(100, 24);
+        Button executeButton = new Button("Execute");
+        executeButton.setPrefSize(100, 20);
 
-        Button btnClose = new Button("Close");
-        btnClose.setPrefSize(100, 24);
+        Button closeButton = new Button("Close");
+        closeButton.setPrefSize(100, 20);
 
-        btnExecute.setOnAction(event -> guiController.executeCommand(inputArea.getText()));
+        TextArea commandLineArea = new TextArea();
+        commandLineArea.setWrapText(true);
 
-        btnClose.setOnAction(event -> guiController.closeGUI());
+        TextArea outputArea = new TextArea();
+        outputArea.setWrapText(true);
+        outputArea.setEditable(false);
+
+        executeButton.setOnAction(event -> guiController.executeCommand(inputArea.getText()));
+
+        closeButton.setOnAction(event -> guiController.closeGUI());
 
         inputArea = new TextArea();
         inputArea.setWrapText(true);
@@ -47,15 +55,15 @@ public class GUI {
         outputArea.setWrapText(true);
         outputArea.setEditable(false);
 
-        hBox.getChildren().addAll(hBox, inputArea, outputArea);
+        hBox.getChildren().addAll(executeButton, closeButton);
 
         VBox vBox = new VBox(15);
         vBox.setPadding(new Insets(20,20,20,20));
         vBox.getChildren().addAll(hBox, inputArea, outputArea);
 
         Scene guiScene = new Scene(vBox, 1000, 500);
-        mainStage.setScene(guiScene);
-        mainStage.show();
+        primaryStage.setScene(guiScene);
+        primaryStage.show();
 
         guiScene.addEventHandler(KeyEvent.KEY_PRESSED, keyInput -> keyPressed(keyInput.getCode()));
     }

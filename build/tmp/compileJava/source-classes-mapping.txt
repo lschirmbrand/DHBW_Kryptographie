@@ -18,14 +18,14 @@ network/ParticipantDefault.java
  network.ParticipantDefault
 configuration/ParticipantType.java
  configuration.ParticipantType
+network/Participant.java
+ network.Participant
+network/Network.java
+ network.Network
 gui/Controller.java
  gui.Controller
 gui/GUI.java
  gui.GUI
  gui.GUI$1
-network/Participant.java
- network.Participant
-network/Network.java
- network.Network
 Application.java
  Application
