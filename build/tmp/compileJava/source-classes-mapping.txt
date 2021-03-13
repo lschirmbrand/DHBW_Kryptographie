@@ -27,8 +27,8 @@ gui/Controller.java
 gui/GUI.java
  gui.GUI
  gui.GUI$1
-Application.java
- Application
+commands/ShowAlgorithmCommand.java
+ commands.ShowAlgorithmCommand
 commands/EncryptMessageCommand.java
  commands.EncryptMessageCommand
 commands/RegisterParticipantCommand.java
@@ -51,5 +51,9 @@ commands/CommandUtil.java
  commands.CommandUtil
 commands/IntruderChannelCommand.java
  commands.IntruderChannelCommand
-commands/ShowAlgorithmCommand.java
- commands.ShowAlgorithmCommand
+database/HSQLDB.java
+ database.HSQLDB
+database/Configuration.java
+ database.Configuration
+Application.java
+ Application
