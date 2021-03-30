@@ -19,7 +19,7 @@ public class SecurityAgency {
     }
 
     public String encrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
-        Object encryptPort = EncryptFactory.build(algorithm);
+        Object encryptPort = BaseFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
@@ -34,7 +34,7 @@ public class SecurityAgency {
     }
 
     public String decrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
-        Object encryptPort = EncryptFactory.build(algorithm);
+        Object encryptPort = BaseFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
@@ -48,10 +48,32 @@ public class SecurityAgency {
         }
     }
 
-    public void crackShift(String message) {
+    public String crackShift(String message) {
+        Object crackerPort = CrackerFactory.build(EncryptionAlgorithm.SHIFT);
+
+        try {
+            return (String) crackerPort.getClass()
+                    .getMethod("decrypt", String.class)
+                    .invoke(crackerPort, message.toUpperCase());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error while cracking";
+        }
     }
 
-    public void crackRSA(String message, String keyFilename) {
+    public String crackRSA(String message, String keyFilename) {
+        Object crackerPort = CrackerFactory.build(EncryptionAlgorithm.RSA);
+
+        File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
+
+        try {
+            return (String) crackerPort.getClass()
+                    .getMethod("decrypt", String.class, File.class)
+                    .invoke(crackerPort, message, keyFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error while cracking";
+        }
     }
 
     public void registerParticipant(String name, Participant.Type type) {

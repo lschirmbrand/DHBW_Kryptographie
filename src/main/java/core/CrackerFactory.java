@@ -7,23 +7,23 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-public class EncryptFactory {
+public class CrackerFactory {
     public static Object build(EncryptionAlgorithm algorithm) {
         Object port = null;
 
         String archivePath = switch (algorithm) {
-            case SHIFT -> Configuration.instance.pathToShiftBaseJavaArchive;
-            case RSA -> Configuration.instance.pathToRSABaseJavaArchive;
+            case SHIFT -> Configuration.instance.pathToShiftCrackerJavaArchive;
+            case RSA -> Configuration.instance.pathToRSACrackerJavaArchive;
         };
 
         String className = switch (algorithm) {
-            case SHIFT -> "ShiftBase";
-            case RSA -> "RSABase";
+            case SHIFT -> "ShiftCracker";
+            case RSA -> "RSACracker";
         };
 
         try {
             URL[] urls = {new File(archivePath).toURI().toURL()};
-            URLClassLoader urlClassLoader = new URLClassLoader(urls, EncryptFactory.class.getClassLoader());
+            URLClassLoader urlClassLoader = new URLClassLoader(urls, CrackerFactory.class.getClassLoader());
             Class clazz = Class.forName(className, true, urlClassLoader);
             Object instance = clazz.getMethod("getInstance").invoke(null);
             port = clazz.getDeclaredField("port").get(instance);

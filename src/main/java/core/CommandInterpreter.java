@@ -13,7 +13,7 @@ public class CommandInterpreter {
 
     public String interpret(String command) {
 
-        String[] args = command.split(" |"+ Configuration.instance.lineSeparator);
+        String[] args = command.split(" |" + Configuration.instance.lineSeparator);
 
         if (command.startsWith("encrypt message")) {
             String message = args[2].substring(1, args[2].length() - 1);
@@ -29,13 +29,13 @@ public class CommandInterpreter {
 
             return securityAgency.decrypt(message, algorithm, keyFilename);
         } else if (command.startsWith("crack encrypted message")) {
-            String message = args[3].substring(1, args[2].length() - 1);
+            String message = args[3].substring(1, args[3].length() - 1);
             EncryptionAlgorithm algorithm = getAlgorithm(args[5]);
             if (algorithm == EncryptionAlgorithm.SHIFT) {
-                securityAgency.crackShift(message);
+                return securityAgency.crackShift(message);
             } else {
                 String keyFilename = args[8];
-                securityAgency.crackRSA(message, keyFilename);
+                return securityAgency.crackRSA(message, keyFilename);
             }
         } else if (command.startsWith("register participant")) {
             String name = args[2];
@@ -68,7 +68,7 @@ public class CommandInterpreter {
             securityAgency.sendMessage(message, part1, part2, algorithm, keyfileName);
         }
 
-        return "";
+        return "unknown command";
     }
 
 

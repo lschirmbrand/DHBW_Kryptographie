@@ -1,5 +1,5 @@
 package configuration;
 
-public enum ExecutionType {
+public enum ExecutionMode {
     NORMAL, DEBUG
 }

@@ -1,5 +1,7 @@
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 //-------------------
 //  Author: 4775194
@@ -57,13 +59,18 @@ public class ShiftCracker {
             unicodeCopy[count] = dec;
         }
 
+        List<String> possibilities = new ArrayList<>();
+
         StringBuilder sb = new StringBuilder();
 
         for (int shift = 1; shift <= 25; shift++) {
-            sb.append(smartShift(shift, unicode, unicodeCopy));
+            String possibility = smartShift(shift, unicode, unicodeCopy);
+            if(!possibility.equals("")) {
+                possibilities.add(possibility);
+            }
         }
 
-        return sb.toString();
+        return String.join(", ", possibilities);
     }
 
 
