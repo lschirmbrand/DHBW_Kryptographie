@@ -2,14 +2,18 @@ package gui;
 
 
 import configuration.Configuration;
+import core.SecurityAgency;
 
 public class Controller {
 
     private final GUI gui;
     private final Configuration configuration = Configuration.instance;
 
+    private final SecurityAgency securityAgency;
+
     public Controller(GUI gui) {
         this.gui = gui;
+        securityAgency = new SecurityAgency();
     }
 
     public void closeGUI() {
@@ -35,7 +39,8 @@ public class Controller {
     }
 
     public void executeCommand(String command) {
-
+        String res = securityAgency.getInterpreter().interpret(command);
+        gui.setOutputText(res);
     }
 
     public boolean isLoggingEnabled() {

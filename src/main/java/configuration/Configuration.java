@@ -6,15 +6,16 @@ public enum Configuration {
     public String userDirectory = System.getProperty("user.dir");
     public String fileSeparator = System.getProperty("file.separator");
     public String commonPathToJavaArchive = userDirectory + fileSeparator + "components" + fileSeparator;
+    public String commonPathToKeyFile = userDirectory + fileSeparator + "keyfiles" + fileSeparator;
     public String lineSeparator = System.getProperty("line.separator");
 
 
     // ShiftBase
-    public String pathToShiftBaseJavaArchive = commonPathToJavaArchive + "rsaBase" + fileSeparator + "build"
+    public String pathToShiftBaseJavaArchive = commonPathToJavaArchive + "shiftBase" + fileSeparator + "build"
             + fileSeparator + "libs" + fileSeparator + "ShiftBase.jar";
 
     // ShiftCracker
-    public String pathToShiftCrackerJavaArchive = commonPathToJavaArchive + "rsaBase" + fileSeparator + "build"
+    public String pathToShiftCrackerJavaArchive = commonPathToJavaArchive + "shiftCracker" + fileSeparator + "build"
             + fileSeparator + "libs" + fileSeparator + "ShiftCracker.jar";
 
     // RSABase
@@ -22,7 +23,7 @@ public enum Configuration {
             + fileSeparator + "libs" + fileSeparator + "RSABase.jar";
 
     // RSACracker
-    public String pathToRSACrackerJavaArchive = commonPathToJavaArchive + "rsaBase" + fileSeparator + "build"
+    public String pathToRSACrackerJavaArchive = commonPathToJavaArchive + "rsaCracker" + fileSeparator + "build"
             + fileSeparator + "libs" + fileSeparator + "RSACracker.jar";
 
 

@@ -1,15 +1,15 @@
 package network;
 
-import configuration.AlgorithmType;
+import configuration.EncryptionAlgorithm;
 
 public class Transmission {
     private final String sender;
     private final String receiver;
     private final String message;
-    private final AlgorithmType algorithm;
+    private final EncryptionAlgorithm algorithm;
     private final String keyFilePath;
 
-    public Transmission(String sender, String receiver, String message, AlgorithmType algorithm, String keyFilePath) {
+    public Transmission(String sender, String receiver, String message, EncryptionAlgorithm algorithm, String keyFilePath) {
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;
@@ -29,7 +29,7 @@ public class Transmission {
         return message;
     }
 
-    public AlgorithmType getAlgorithm() {
+    public EncryptionAlgorithm getAlgorithm() {
         return algorithm;
     }
 

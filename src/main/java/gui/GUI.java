@@ -40,7 +40,7 @@ public class GUI extends Application {
         TextArea commandLineArea = new TextArea();
         commandLineArea.setWrapText(true);
 
-        TextArea outputArea = new TextArea();
+        outputArea = new TextArea();
         outputArea.setWrapText(true);
         outputArea.setEditable(false);
 
@@ -92,7 +92,7 @@ public class GUI extends Application {
     }
 
     public void setOutputText(String text) {
-        if (outputArea.getText().isBlank()) {
+        if (!outputArea.getText().isBlank()) {
             outputArea.appendText(Configuration.instance.lineSeparator + text);
         } else {
             outputArea.appendText(text);
