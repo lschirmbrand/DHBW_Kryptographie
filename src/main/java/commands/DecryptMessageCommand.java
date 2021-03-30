@@ -1,6 +1,6 @@
 package commands;
 
-public class DecryptMessageCommand implements ICommand{
+public class DecryptMessageCommand implements ICommand {
     @Override
     public void execute() {
 

@@ -5,40 +5,40 @@ import configuration.Configuration;
 
 public class Controller {
 
-    private GUI gui;
-    private Configuration configuration = Configuration.instance;
+    private final GUI gui;
+    private final Configuration configuration = Configuration.instance;
 
     public Controller(GUI gui) {
         this.gui = gui;
     }
 
-    public void closeGUI(){
+    public void closeGUI() {
         System.exit(0);
     }
 
-    public void displayText(String text){
+    public void displayText(String text) {
         gui.setOutputText(text);
     }
 
-    public void showLog(){
+    public void showLog() {
 
     }
 
-    public void disableLogging(){
+    public void disableLogging() {
         displayText("Logging turned: On");
         configuration.enableLogging();
     }
 
-    public void enableLogging(){
+    public void enableLogging() {
         displayText("Logging turned: Off");
         configuration.disableLogging();
     }
 
-    public void executeCommand(String command){
+    public void executeCommand(String command) {
 
     }
 
-    public boolean isLoggingEnabled(){
+    public boolean isLoggingEnabled() {
         return true;
     }
 }

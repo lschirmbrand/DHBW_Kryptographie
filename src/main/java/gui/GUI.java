@@ -58,7 +58,7 @@ public class GUI extends Application {
         hBox.getChildren().addAll(executeButton, closeButton);
 
         VBox vBox = new VBox(15);
-        vBox.setPadding(new Insets(20,20,20,20));
+        vBox.setPadding(new Insets(20, 20, 20, 20));
         vBox.getChildren().addAll(hBox, inputArea, outputArea);
 
         Scene guiScene = new Scene(vBox, 1000, 500);
@@ -68,10 +68,10 @@ public class GUI extends Application {
         guiScene.addEventHandler(KeyEvent.KEY_PRESSED, keyInput -> keyPressed(keyInput.getCode()));
     }
 
-    private void keyPressed(KeyCode keyCode){
-        switch(keyCode){
+    private void keyPressed(KeyCode keyCode) {
+        switch (keyCode) {
             case F3:
-                if(guiController.isLoggingEnabled()){
+                if (guiController.isLoggingEnabled()) {
                     guiController.disableLogging();
                 } else {
                     guiController.enableLogging();
@@ -82,13 +82,17 @@ public class GUI extends Application {
                 break;
             case F8:
                 break;
-
             default:
+                break;
         }
     }
 
-    public void setOutputText(String text){
-        if(outputArea.getText().isBlank()){
+    public String getOutputText() {
+        return outputArea.getText();
+    }
+
+    public void setOutputText(String text) {
+        if (outputArea.getText().isBlank()) {
             outputArea.appendText(Configuration.instance.lineSeparator + text);
         } else {
             outputArea.appendText(text);
@@ -96,11 +100,7 @@ public class GUI extends Application {
         outputArea.positionCaret(outputArea.getLength());
     }
 
-    public String getOutputText(){
-        return outputArea.getText();
-    }
-
-    public void clearText(){
+    public void clearText() {
         outputArea.setText("");
     }
 }

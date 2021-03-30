@@ -255,7 +255,7 @@ public enum HSQLDB {
         createTablePostbox("msa");
     }
 
-    public void outerUpdate(String sqlStatement){
+    public void outerUpdate(String sqlStatement) {
         update(sqlStatement);
     }
 }

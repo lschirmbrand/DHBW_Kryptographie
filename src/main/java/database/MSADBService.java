@@ -17,7 +17,7 @@ import java.util.List;
 public enum MSADBService implements IMSADBService {
     instance;
 
-    private HSQLDB db = HSQLDB.instance;
+    private final HSQLDB db = HSQLDB.instance;
     private Connection conn;
 
     @Override

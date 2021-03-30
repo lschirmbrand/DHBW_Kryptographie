@@ -5,13 +5,13 @@ import com.google.common.eventbus.EventBus;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Channel implements IChannel{
+public class Channel implements IChannel {
 
-    private String name;
-    private EventBus eventBus;
-    private List<Participant> participants;
+    private final String name;
+    private final EventBus eventBus;
+    private final List<Participant> participants;
 
-    public Channel(String name){
+    public Channel(String name) {
         this.name = name;
         this.eventBus = new EventBus();
         this.participants = new LinkedList<>();

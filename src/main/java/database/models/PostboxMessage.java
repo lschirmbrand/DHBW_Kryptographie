@@ -6,7 +6,7 @@ public class PostboxMessage {
     private final String message;
     private final String timestamp;
 
-    public PostboxMessage(Participant participantSender, Participant participantReceiver, String message, String timestamp){
+    public PostboxMessage(Participant participantSender, Participant participantReceiver, String message, String timestamp) {
         this.participantSender = participantSender;
         this.participantReceiver = participantReceiver;
         this.message = message;

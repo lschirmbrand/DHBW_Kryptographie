@@ -26,7 +26,6 @@ public enum Configuration {
             + fileSeparator + "libs" + fileSeparator + "RSACracker.jar";
 
 
-
     // Database
     public final String databaseDirectory = userDirectory + fileSeparator + "database" + fileSeparator;
     public final String databaseFile = databaseDirectory + "cryptoDB.db";
@@ -39,11 +38,11 @@ public enum Configuration {
     public final String logsDirectory = userDirectory + fileSeparator + "log";
 
 
-    public void enableLogging(){
+    public void enableLogging() {
 
     }
 
-    public void disableLogging(){
+    public void disableLogging() {
 
     }
 }

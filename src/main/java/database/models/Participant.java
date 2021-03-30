@@ -4,7 +4,7 @@ public class Participant {
     private final String name;
     private final String type;
 
-    public Participant(String name, String type){
+    public Participant(String name, String type) {
         this.name = name;
         this.type = type;
     }

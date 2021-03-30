@@ -3,13 +3,13 @@ package network;
 import configuration.AlgorithmType;
 
 public class Transmission {
-    private String sender;
-    private String receiver;
-    private String message;
-    private AlgorithmType algorithm;
-    private String keyFilePath;
+    private final String sender;
+    private final String receiver;
+    private final String message;
+    private final AlgorithmType algorithm;
+    private final String keyFilePath;
 
-    public Transmission(String sender, String receiver, String message, AlgorithmType algorithm, String keyFilePath){
+    public Transmission(String sender, String receiver, String message, AlgorithmType algorithm, String keyFilePath) {
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;

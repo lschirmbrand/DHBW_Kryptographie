@@ -1,6 +1,6 @@
 package commands;
 
-public class CrackMessageCommand implements ICommand{
+public class CrackMessageCommand implements ICommand {
     @Override
     public void execute() {
 

@@ -9,7 +9,7 @@ public class Message {
     private final String plainMessage;
     private final String encryptedMessage;
 
-    public Message(Participant participantSender, Participant participantReceiver, String algorithm, String keyfile, String timestamp, String plainMessage, String encryptedMessage){
+    public Message(Participant participantSender, Participant participantReceiver, String algorithm, String keyfile, String timestamp, String plainMessage, String encryptedMessage) {
         this.participantSender = participantSender;
         this.participantReceiver = participantReceiver;
         this.algorithm = algorithm;
@@ -19,11 +19,11 @@ public class Message {
         this.encryptedMessage = encryptedMessage;
     }
 
-    public Participant getParticipantSender(){
+    public Participant getParticipantSender() {
         return this.participantSender;
     }
 
-    public Participant getParticipantReceiver(){
+    public Participant getParticipantReceiver() {
         return this.participantReceiver;
     }
 

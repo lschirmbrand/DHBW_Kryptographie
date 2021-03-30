@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Network implements INetwork{
+public class Network implements INetwork {
 
-    private Map<String, IChannel> channels = new HashMap<>();
+    private final Map<String, IChannel> channels = new HashMap<>();
 
     @Override
     public void createChannel(String name, Participant a, Participant b) {
@@ -33,11 +33,11 @@ public class Network implements INetwork{
 
     @Override
     public Participant getParticipant(String name) {
-        for(IChannel channel : this.channels.values()){
+        for (IChannel channel : this.channels.values()) {
             List<Participant> participants = channel.getParticipants();
 
-            for(Participant participant : participants){
-                if(participant.getName().equals(name))
+            for (Participant participant : participants) {
+                if (participant.getName().equals(name))
                     return participant;
             }
         }

@@ -6,21 +6,21 @@ public class Channel {
     private final Participant participantA;
     private final Participant participantB;
 
-    public Channel(String name, Participant participantA, Participant participantB){
+    public Channel(String name, Participant participantA, Participant participantB) {
         this.name = name;
         this.participantA = participantA;
         this.participantB = participantB;
     }
 
-    public String getName(){
+    public String getName() {
         return this.name;
     }
 
-    public Participant getParticipantA(){
+    public Participant getParticipantA() {
         return this.participantA;
     }
 
-    public Participant getParticipantB(){
+    public Participant getParticipantB() {
         return this.participantB;
     }
 

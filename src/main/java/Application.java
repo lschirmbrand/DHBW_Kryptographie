@@ -13,19 +13,19 @@ public class Application {
         javafx.application.Application.launch(GUI.class);
     }
 
-    public void init(){
+    public void init() {
         dbService.setupConnection();
     }
 
-    private void startupGUI(){
+    private void startupGUI() {
 
     }
 
-    private void close(){
+    private void close() {
         HSQLDB.instance.shutdown();
     }
 
-    private void initNetworks(){
+    private void initNetworks() {
 
     }
 }
