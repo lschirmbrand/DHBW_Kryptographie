@@ -8,18 +8,17 @@ import java.io.File;
 
 public class SecurityAgency {
 
-    private final CommandInterpreter interpreter;
+    private final CommandInterpreter interpreter = new CommandInterpreter(this);
 
-    public SecurityAgency() {
-        this.interpreter = new CommandInterpreter(this);
-    }
+    private final BaseFactory baseFactory = new BaseFactory();
+    private final CrackerFactory crackerFactory = new CrackerFactory();
 
     public CommandInterpreter getInterpreter() {
         return interpreter;
     }
 
     public String encrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
-        Object encryptPort = BaseFactory.build(algorithm);
+        Object encryptPort = baseFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
@@ -34,7 +33,7 @@ public class SecurityAgency {
     }
 
     public String decrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
-        Object encryptPort = BaseFactory.build(algorithm);
+        Object encryptPort = crackerFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
@@ -49,7 +48,7 @@ public class SecurityAgency {
     }
 
     public String crackShift(String message) {
-        Object crackerPort = CrackerFactory.build(EncryptionAlgorithm.SHIFT);
+        Object crackerPort = crackerFactory.build(EncryptionAlgorithm.SHIFT);
 
         try {
             return (String) crackerPort.getClass()
@@ -62,7 +61,7 @@ public class SecurityAgency {
     }
 
     public String crackRSA(String message, String keyFilename) {
-        Object crackerPort = CrackerFactory.build(EncryptionAlgorithm.RSA);
+        Object crackerPort = crackerFactory.build(EncryptionAlgorithm.RSA);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
