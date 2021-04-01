@@ -1,10 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 //-------------------
 //  Author: 4775194
@@ -15,6 +12,8 @@ public class RSACracker {
 
     private BigInteger e = BigInteger.ZERO;
     private BigInteger n = BigInteger.ZERO;
+
+    private Date start;
 
     public Port port;
 
@@ -38,6 +37,7 @@ public class RSACracker {
     }
 
     private String decryptMessage(String encryptedMessage, File publicKeyfile) throws FileNotFoundException {
+        start = new Date();
         readKeyFile(publicKeyfile);
 
         byte[] bytes = Base64.getDecoder().decode(encryptedMessage);
@@ -99,7 +99,7 @@ public class RSACracker {
         return cipher.modPow(d, n);
     }
 
-    public List<BigInteger> factorize(BigInteger n) {
+    public List<BigInteger> factorize(BigInteger n) throws RSACrackingException {
         BigInteger two = BigInteger.valueOf(2);
         List<BigInteger> factorList = new LinkedList<>();
 
@@ -112,6 +112,7 @@ public class RSACracker {
             n = n.divide(two);
             if (Thread.currentThread().isInterrupted())
                 return null;
+            checkMaxTime();
         }
 
         if (n.compareTo(BigInteger.ONE) > 0) {
@@ -125,10 +126,17 @@ public class RSACracker {
                 }
                 if (Thread.currentThread().isInterrupted())
                     return null;
+                checkMaxTime();
             }
             factorList.add(n);
         }
 
         return factorList;
+    }
+
+    private void checkMaxTime() throws RSACrackingException {
+        if ((new Date().getTime() - start.getTime()) / 1000 > 30) {
+            throw new RSACrackingException("Cracking took to long");
+        }
     }
 }

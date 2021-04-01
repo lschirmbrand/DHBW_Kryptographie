@@ -33,6 +33,8 @@ public class RSABase {
     private String decryptMessage(String encryptedMessage, File privateKeyfile) throws FileNotFoundException {
         readPrivateKeyFile(privateKeyfile);
 
+        System.out.println("got here");
+
         byte[] cipher = Base64.getDecoder().decode(encryptedMessage);
         byte[] msg = crypt(new BigInteger(cipher), key).toByteArray();
         return new String(msg);
