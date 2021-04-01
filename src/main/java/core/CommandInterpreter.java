@@ -1,82 +1,83 @@
 package core;
 
-import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
 import database.models.Participant;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class CommandInterpreter {
-    private final SecurityAgency securityAgency;
+    Map<String, Function<List<String>, String>> regexMap;
 
     public CommandInterpreter(SecurityAgency securityAgency) {
-        this.securityAgency = securityAgency;
+
+        regexMap = Map.of(
+                "encrypt message \"(.*)\" using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
+                groups -> securityAgency.encrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2)),
+                "decrypt message \"(.*)\" using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
+                groups -> securityAgency.decrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2)),
+                "crack encrypted message \"(.*)\" using (shift)",
+                groups -> securityAgency.crackShift(groups.get(0)),
+                "crack encrypted message \"(.*)\" using (rsa) and keyfile ([A-Za-z0-9]*.json)",
+                groups -> securityAgency.crackRSA(groups.get(0), groups.get(2)),
+                "register participant ([A-Za-z0-9]*) with type (normal|intruder)",
+                groups -> securityAgency.registerParticipant(groups.get(0), getParticipantType(groups.get(1))),
+                "create channel ([A-Za-z0-9_]*) from ([A-Za-z0-9_]*) to ([A-Za-z0-9_]*)",
+                groups -> securityAgency.createChannel(groups.get(0), groups.get(1), groups.get(2)),
+                "show channel",
+                groups -> securityAgency.showChannel(),
+                "drop channel ([A-Za-z0-9_]*)",
+                groups -> securityAgency.dropChannel(groups.get(0)),
+                "intrude channel ([A-Za-z0-9_]*) by ([A-Za-z0-9_]*)",
+                groups -> securityAgency.intrudeChannel(groups.get(0), groups.get(1)),
+                "send message \"([A-Za-z0-9 ]*)\" from ([A-Za-z0-9_]*) to ([A-Za-z0-9_]*) using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
+                groups -> securityAgency.sendMessage(groups.get(0), groups.get(1), groups.get(2), getAlgorithm(groups.get(3)), groups.get(4))
+        );
     }
 
     public String interpret(String command) {
 
-        String[] args = command.split(" |" + Configuration.instance.lineSeparator);
-
-        if (command.startsWith("encrypt message")) {
-            String message = args[2].substring(1, args[2].length() - 1);
-            EncryptionAlgorithm algorithm = getAlgorithm(args[4]);
-            String keyFilename = args[7];
-
-            return securityAgency.encrypt(message, algorithm, keyFilename);
-
-        } else if (command.startsWith("decrypt message")) {
-            String message = args[2].substring(1, args[2].length() - 1);
-            EncryptionAlgorithm algorithm = getAlgorithm(args[4]);
-            String keyFilename = args[7];
-
-            return securityAgency.decrypt(message, algorithm, keyFilename);
-        } else if (command.startsWith("crack encrypted message")) {
-            String message = args[3].substring(1, args[3].length() - 1);
-            EncryptionAlgorithm algorithm = getAlgorithm(args[5]);
-            if (algorithm == EncryptionAlgorithm.SHIFT) {
-                return securityAgency.crackShift(message);
-            } else {
-                String keyFilename = args[8];
-                return securityAgency.crackRSA(message, keyFilename);
+        for (Map.Entry<String, Function<List<String>, String>> entry : regexMap.entrySet()) {
+            List<String> groups = match(entry.getKey(), command);
+            if (groups != null) {
+                return entry.getValue().apply(groups);
             }
-        } else if (command.startsWith("register participant")) {
-            String name = args[2];
-            Participant.Type type = switch (args[5]) {
-                case "normal" -> Participant.Type.NORMAL;
-                case "intruder" -> Participant.Type.INTRUDER;
-                default -> throw new IllegalStateException("Unexpected value: " + args[5]);
-            };
-            securityAgency.registerParticipant(name, type);
-        } else if (command.startsWith("create channel")) {
-            String name = args[2];
-            String part1 = args[4];
-            String part2 = args[6];
-            securityAgency.createChannel(name, part1, part2);
-        } else if (command.startsWith("show channel")) {
-            securityAgency.showChannel();
-        } else if (command.startsWith("drop channel")) {
-            String name = args[2];
-            securityAgency.dropChannel(name);
-        } else if (command.startsWith("intrude channel")) {
-            String name = args[2];
-            String part = args[4];
-            securityAgency.intrudeChannel(name, part);
-        } else if (command.startsWith("send message")) {
-            String message = args[2].substring(1, args[2].length() - 1);
-            String part1 = args[4];
-            String part2 = args[6];
-            EncryptionAlgorithm algorithm = getAlgorithm(args[8]);
-            String keyfileName = args[11];
-            securityAgency.sendMessage(message, part1, part2, algorithm, keyfileName);
         }
 
         return "unknown command";
     }
 
 
+    private List<String> match(String regex, String command) {
+        List<String> matchedGroups = new ArrayList<>();
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(command);
+        if (matcher.find()) {
+            for (int i = 1; i < matcher.groupCount() + 1; i++) {
+                matchedGroups.add(matcher.group(i));
+            }
+            return matchedGroups;
+        }
+        return null;
+    }
+
     private EncryptionAlgorithm getAlgorithm(String arg) {
         return switch (arg.toLowerCase()) {
             case "shift" -> EncryptionAlgorithm.SHIFT;
             case "rsa" -> EncryptionAlgorithm.RSA;
             default -> throw new IllegalStateException("Unexpected value: " + arg);
+        };
+    }
+
+    private Participant.Type getParticipantType(String type) {
+        return switch (type) {
+            case "normal" -> Participant.Type.NORMAL;
+            case "intruder" -> Participant.Type.INTRUDER;
+            default -> throw new IllegalStateException("Unexpected value: " + type);
         };
     }
 }

@@ -2,9 +2,13 @@ package core;
 
 import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
+import database.MSADBService;
+import database.models.Channel;
 import database.models.Participant;
 
 import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SecurityAgency {
 
@@ -12,6 +16,8 @@ public class SecurityAgency {
 
     private final BaseFactory baseFactory = new BaseFactory();
     private final CrackerFactory crackerFactory = new CrackerFactory();
+
+    private final MSADBService msadbService = MSADBService.instance;
 
     public CommandInterpreter getInterpreter() {
         return interpreter;
@@ -76,22 +82,68 @@ public class SecurityAgency {
         }
     }
 
-    public void registerParticipant(String name, Participant.Type type) {
+    public String registerParticipant(String name, Participant.Type type) {
+        if (!msadbService.getTypes().contains(type.getValue())) {
+            msadbService.insertType(type.getValue());
+        }
+
+        if (msadbService.participantExists(name)) {
+            return "participant " + name + " already exists, using existing postbox_" + name;
+        } else {
+            msadbService.insertParticipant(name, type.getValue());
+            return "participant " + name + " with type " + type.getValue() + " registered and postbox_" + name + " created";
+        }
     }
 
-    public void createChannel(String name, String part1, String part2) {
+    public String createChannel(String name, String part1, String part2) {
+        if (msadbService.channelExists(name)) {
+            return "channel " + name + " already exists";
+        }
+        List<Channel> channels = msadbService.getChannels();
+        for (Channel channel : channels) {
+            if ((channel.getParticipantA().getName().equals(part1) && channel.getParticipantB().getName().equals(part2))
+                    || (channel.getParticipantA().getName().equals(part2) && channel.getParticipantB().getName().equals(part1))) {
+                return "communication channel between " + part1 + " and " + part2 + " already exists";
+            }
+        }
+        if (part1.equals(part2)) {
+            return part1 + " and " + part2 + " are identical - cannot create channel on itself";
+        }
+        List<String> partNames = msadbService.getParticipants().stream().map(Participant::getName).collect(Collectors.toList());
+        if (!partNames.contains(part1)) {
+            return part1 + " is not a known participant";
+        }
+        if (!partNames.contains(part2)) {
+            return part2 + " is not a known participant";
+        }
+
+        msadbService.insertChannel(name, part1, part2);
+        return "channel " + name + "from " + part1 + " to " + part2 + " successfully created";
     }
 
-    public void showChannel() {
+    public String showChannel() {
+        return msadbService.getChannels().stream()
+                .map(channel ->
+                        channel.getName() + "\t | " + channel.getParticipantA().getName() + "\t and " + channel.getParticipantB().getName()
+                ).collect(Collectors.joining("\n"));
     }
 
-    public void dropChannel(String name) {
+    public String dropChannel(String name) {
+        List<String> channelNames = msadbService.getChannels().stream().map(Channel::getName).collect(Collectors.toList());
+        if (channelNames.contains(name)) {
+            msadbService.dropChannel(name);
+            return "channel " + name + " deleted";
+        } else {
+            return "unknown channel " + name;
+        }
     }
 
-    public void intrudeChannel(String name, String part) {
+    public String intrudeChannel(String name, String part) {
+        return "";
     }
 
-    public void sendMessage(String message, String part1, String part2, EncryptionAlgorithm algorithm, String keyfileName) {
+    public String sendMessage(String message, String part1, String part2, EncryptionAlgorithm algorithm, String keyfileName) {
+        return "";
     }
 
 }

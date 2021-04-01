@@ -17,7 +17,7 @@ public interface IMSADBService {
 
     void shutdown();
 
-    void dropChannel();
+    void dropChannel(String channelName);
 
     // Inserts
 

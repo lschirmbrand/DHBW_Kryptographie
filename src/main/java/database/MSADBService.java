@@ -22,7 +22,8 @@ public enum MSADBService implements IMSADBService {
 
     @Override
     public void setupConnection() {
-        db.setupConnection();
+        db.setupDatabase();
+        this.conn = db.getConnection();
     }
 
     @Override
@@ -45,8 +46,14 @@ public enum MSADBService implements IMSADBService {
     }
 
     @Override
-    public void dropChannel() {
-
+    public void dropChannel(String channelName) {
+        try {
+            Statement statement = conn.createStatement();
+            String sql = "DELETE FROM CHANNEL WHERE name='" + channelName+"'";
+            ResultSet resultSet = statement.executeQuery(sql);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     @Override
@@ -102,12 +109,16 @@ public enum MSADBService implements IMSADBService {
     public void insertParticipant(String name, String type) {
         name = name.toLowerCase();
         int typeID = getTypeID(type);
+
+        int id = getParticipants().size() + 1;
+
         StringBuilder sqlStringBuilder = new StringBuilder();
-        sqlStringBuilder.append("INSERT INTO participants (").append("name").append(",").append("type_id").append(")");
-        sqlStringBuilder.append(" VALUES ");
-        sqlStringBuilder.append("(").append("'").append(name).append("',");
-        sqlStringBuilder.append(typeID);
-        sqlStringBuilder.append(")");
+        sqlStringBuilder.append("INSERT INTO participants (id, name, type_id)")
+                .append(" VALUES (")
+                .append(id).append(", ")
+                .append("'").append(name).append("',")
+                .append(typeID)
+                .append(")");
         System.out.println("SQL-Statement Builder: " + sqlStringBuilder.toString());
         db.outerUpdate(sqlStringBuilder.toString());
 
@@ -149,7 +160,7 @@ public enum MSADBService implements IMSADBService {
         int participantFromID = getParticipantID(participantSender);
         long timeStamp = Instant.now().getEpochSecond();
         StringBuilder sqlStringBuilder = new StringBuilder();
-        sqlStringBuilder.append("INSERT INTO postbox_" + participantReceiver + " (participant_from_id, message, timestamp)");
+        sqlStringBuilder.append("INSERT INTO postbox_").append(participantReceiver).append(" (participant_from_id, message, timestamp)");
         sqlStringBuilder.append(" VALUES (");
         sqlStringBuilder.append(MessageFormat.format("{0}, ''{1}'', {2} ",
                 participantFromID, message, Long.toString(timeStamp)));
@@ -224,11 +235,12 @@ public enum MSADBService implements IMSADBService {
             String sqlStatement = "SELECT * from channel";
             try (ResultSet resultSet = statement.executeQuery(sqlStatement)) {
                 while (resultSet.next()) {
+                    String name = resultSet.getString("name");
                     int participant1ID = resultSet.getInt("participant_01");
                     int participant2ID = resultSet.getInt("participant_02");
                     Participant participantA = getParticipant(participant1ID);
                     Participant participantB = getParticipant(participant2ID);
-                    channelList.add(getOneChannel(participantA.getName(), participantB.getName()));
+                    channelList.add(new Channel(name, participantA, participantB));
                 }
             }
         } catch (SQLException sqlException) {
