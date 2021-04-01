@@ -33,7 +33,7 @@ public class SecurityAgency {
     }
 
     public String decrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
-        Object encryptPort = crackerFactory.build(algorithm);
+        Object encryptPort = baseFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
@@ -66,9 +66,10 @@ public class SecurityAgency {
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
         try {
-            return (String) crackerPort.getClass()
+            String crackedMessage = (String) crackerPort.getClass()
                     .getMethod("decrypt", String.class, File.class)
                     .invoke(crackerPort, message, keyFile);
+            return (crackedMessage != null) ? crackedMessage : "cracking encrypted message \"" + message + "\" failed";
         } catch (Exception e) {
             e.printStackTrace();
             return "Error while cracking";
