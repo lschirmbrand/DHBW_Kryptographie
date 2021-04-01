@@ -32,3 +32,5 @@ Create Channels
 
 
 crack encrypted message "fS0zIA==" using rsa and keyfile rsa32.json
+
+send message "test" from branch_hkg to branch_cpt using rsa and keyfile rsa256.json

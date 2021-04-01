@@ -1,11 +1,7 @@
-package core;
+package core.encryption;
 
 import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
-
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 public class CrackerFactory extends JarFactory {
     @Override

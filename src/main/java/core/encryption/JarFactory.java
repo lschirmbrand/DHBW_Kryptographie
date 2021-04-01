@@ -1,6 +1,5 @@
-package core;
+package core.encryption;
 
-import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
 
 import java.io.BufferedReader;

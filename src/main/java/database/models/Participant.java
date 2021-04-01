@@ -16,18 +16,4 @@ public class Participant {
     public String getType() {
         return type;
     }
-
-    public static enum Type {
-        NORMAL("normal"), INTRUDER("intruder");
-
-        private String value;
-
-        Type(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
 }

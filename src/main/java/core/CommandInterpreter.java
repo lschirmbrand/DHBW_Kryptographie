@@ -1,7 +1,6 @@
 package core;
 
 import configuration.EncryptionAlgorithm;
-import database.models.Participant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,17 +23,17 @@ public class CommandInterpreter {
                 groups -> securityAgency.crackShift(groups.get(0)),
                 "crack encrypted message \"(.*)\" using (rsa) and keyfile ([A-Za-z0-9]*.json)",
                 groups -> securityAgency.crackRSA(groups.get(0), groups.get(2)),
-                "register participant ([A-Za-z0-9]*) with type (normal|intruder)",
+                "register participant (.*) with type (normal|intruder)",
                 groups -> securityAgency.registerParticipant(groups.get(0), getParticipantType(groups.get(1))),
-                "create channel ([A-Za-z0-9_]*) from ([A-Za-z0-9_]*) to ([A-Za-z0-9_]*)",
+                "create channel (.*) from (.*) to (.*)",
                 groups -> securityAgency.createChannel(groups.get(0), groups.get(1), groups.get(2)),
                 "show channel",
                 groups -> securityAgency.showChannel(),
-                "drop channel ([A-Za-z0-9_]*)",
+                "drop channel (.*)",
                 groups -> securityAgency.dropChannel(groups.get(0)),
-                "intrude channel ([A-Za-z0-9_]*) by ([A-Za-z0-9_]*)",
+                "intrude channel (.*) by (.*)",
                 groups -> securityAgency.intrudeChannel(groups.get(0), groups.get(1)),
-                "send message \"([A-Za-z0-9 ]*)\" from ([A-Za-z0-9_]*) to ([A-Za-z0-9_]*) using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
+                "send message \"(.*)\" from (.*) to (.*) using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
                 groups -> securityAgency.sendMessage(groups.get(0), groups.get(1), groups.get(2), getAlgorithm(groups.get(3)), groups.get(4))
         );
     }
