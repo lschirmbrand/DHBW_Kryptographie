@@ -29,46 +29,6 @@ public class CommandInterpreter {
         );
     }
 
-    private String encryptMessage(List<String> groups) {
-        return this.securityAgency.encrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2));
-    }
-
-    private String decryptMessage(List<String> groups) {
-        return this.securityAgency.decrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2));
-    }
-
-    private String crackShift(List<String> groups) {
-        return this.securityAgency.crackShift(groups.get(0));
-    }
-
-    private String crackRSA(List<String> groups) {
-        return this.securityAgency.crackRSA(groups.get(0), groups.get(2));
-    }
-
-    private String registerParticipant(List<String> groups) {
-        return this.securityAgency.registerParticipant(groups.get(0), getParticipantType(groups.get(1)));
-    }
-
-    private String createChannel(List<String> groups) {
-        return this.securityAgency.createChannel(groups.get(0), groups.get(1), groups.get(2));
-    }
-
-    private String showChannel(List<String> groups) {
-        return this.securityAgency.showChannel();
-    }
-
-    private String dropChannel(List<String> groups) {
-        return securityAgency.dropChannel(groups.get(0));
-    }
-
-    private String intrudeChannel(List<String> groups) {
-        return securityAgency.intrudeChannel(groups.get(0), groups.get(1));
-    }
-
-    private String sendMessage(List<String> groups) {
-        return securityAgency.sendMessage(groups.get(0), groups.get(1), groups.get(2), getAlgorithm(groups.get(3)), groups.get(4));
-    }
-
     public String interpret(String command) {
 
         for (Map.Entry<String, Function<List<String>, String>> entry : regexMap.entrySet()) {
@@ -80,7 +40,6 @@ public class CommandInterpreter {
 
         return "unknown command";
     }
-
 
     private List<String> match(String regex, String command) {
         List<String> matchedGroups = new ArrayList<>();
@@ -95,19 +54,78 @@ public class CommandInterpreter {
         return null;
     }
 
+    private String encryptMessage(List<String> groups) {
+        String message = groups.get(0);
+        EncryptionAlgorithm algorithm = getAlgorithm(groups.get(1));
+        String keyFilename = groups.get(2);
+        return this.securityAgency.encrypt(message, algorithm, keyFilename);
+    }
+
+    private String decryptMessage(List<String> groups) {
+        String message = groups.get(0);
+        EncryptionAlgorithm algorithm = getAlgorithm(groups.get(1));
+        String keyFilename = groups.get(2);
+        return this.securityAgency.decrypt(message, algorithm, keyFilename);
+    }
+
+    private String crackShift(List<String> groups) {
+        String message = groups.get(0);
+        return this.securityAgency.crackShift(message);
+    }
+
+    private String crackRSA(List<String> groups) {
+        String message = groups.get(0);
+        String keyFilename = groups.get(2);
+        return this.securityAgency.crackRSA(message, keyFilename);
+    }
+
+    private String registerParticipant(List<String> groups) {
+        String name = groups.get(0);
+        String type = groups.get(1);
+        Participant.Type participantType = switch (type) {
+            case "normal" -> Participant.Type.NORMAL;
+            case "intruder" -> Participant.Type.INTRUDER;
+            default -> throw new IllegalStateException("Unexpected value: " + type);
+        };
+        return this.securityAgency.registerParticipant(name, participantType);
+    }
+
+    private String createChannel(List<String> groups) {
+        String name = groups.get(0);
+        String pName1 = groups.get(1);
+        String pName2 = groups.get(2);
+        return this.securityAgency.createChannel(name, pName1, pName2);
+    }
+
+    private String showChannel(List<String> groups) {
+        return this.securityAgency.showChannel();
+    }
+
+    private String dropChannel(List<String> groups) {
+        String name = groups.get(0);
+        return securityAgency.dropChannel(name);
+    }
+
+    private String intrudeChannel(List<String> groups) {
+        String name = groups.get(0);
+        String part = groups.get(1);
+        return securityAgency.intrudeChannel(name, part);
+    }
+
+    private String sendMessage(List<String> groups) {
+        String message = groups.get(0);
+        String pName1 = groups.get(1);
+        String pName2 = groups.get(2);
+        EncryptionAlgorithm algorithm = getAlgorithm(groups.get(3));
+        String keyfileName = groups.get(4);
+        return securityAgency.sendMessage(message, pName1, pName2, algorithm, keyfileName);
+    }
+
     private EncryptionAlgorithm getAlgorithm(String arg) {
         return switch (arg.toLowerCase()) {
             case "shift" -> EncryptionAlgorithm.SHIFT;
             case "rsa" -> EncryptionAlgorithm.RSA;
             default -> throw new IllegalStateException("Unexpected value: " + arg);
-        };
-    }
-
-    private Participant.Type getParticipantType(String type) {
-        return switch (type) {
-            case "normal" -> Participant.Type.NORMAL;
-            case "intruder" -> Participant.Type.INTRUDER;
-            default -> throw new IllegalStateException("Unexpected value: " + type);
         };
     }
 }

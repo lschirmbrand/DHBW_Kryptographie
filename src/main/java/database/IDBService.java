@@ -7,7 +7,7 @@ import database.models.PostboxMessage;
 
 import java.util.List;
 
-public interface IMSADBService {
+public interface IDBService {
 
     void setupConnection();
 

@@ -3,7 +3,8 @@ package core;
 import com.google.common.eventbus.EventBus;
 import configuration.EncryptionAlgorithm;
 import core.encryption.Encryption;
-import database.MSADBService;
+import database.HSQLDBService;
+import database.IDBService;
 import database.models.Channel;
 
 import java.util.HashMap;
@@ -15,14 +16,16 @@ public class SecurityAgency {
 
     private final CommandInterpreter interpreter;
 
-    private final MSADBService msadbService;
+    private final IDBService dbService;
 
     private final Map<String, Participant> participants;
     private final Map<String, EventBus> channels;
 
     public SecurityAgency() {
         interpreter = new CommandInterpreter(this);
-        msadbService = MSADBService.instance;
+        dbService = HSQLDBService.instance;
+        dbService.setupConnection();
+
         participants = new HashMap<>();
         channels = new HashMap<>();
         setupParticipants();
@@ -30,7 +33,7 @@ public class SecurityAgency {
     }
 
     private void setupParticipants() {
-        for (database.models.Participant participant : msadbService.getParticipants()) {
+        for (database.models.Participant participant : dbService.getParticipants()) {
             Participant.Type type = switch (participant.getType()) {
                 case "normal" -> Participant.Type.NORMAL;
                 case "intruder" -> Participant.Type.INTRUDER;
@@ -41,7 +44,7 @@ public class SecurityAgency {
     }
 
     private void setupChannels() {
-        for (Channel channel : msadbService.getChannels()) {
+        for (Channel channel : dbService.getChannels()) {
             addChannel(channel.getName(), channel.getParticipantA().getName(), channel.getParticipantB().getName());
         }
     }
@@ -66,11 +69,11 @@ public class SecurityAgency {
         if (participants.containsKey(name)) {
             return "participant " + name + " already exists, using existing postbox_" + name;
         }
-        if (!msadbService.getTypes().contains(type.getValue())) {
-            msadbService.insertType(type.getValue());
+        if (!dbService.getTypes().contains(type.getValue())) {
+            dbService.insertType(type.getValue());
         }
 
-        msadbService.insertParticipant(name, type.getValue());
+        dbService.insertParticipant(name, type.getValue());
         participants.put(name, new Participant(name, type));
         return "participant " + name + " with type " + type.getValue() + " registered and postbox_" + name + " created";
     }
@@ -79,7 +82,7 @@ public class SecurityAgency {
         if (channels.containsKey(name)) {
             return "channel " + name + " already exists";
         }
-        List<database.models.Channel> dbChannels = msadbService.getChannels();
+        List<database.models.Channel> dbChannels = dbService.getChannels();
         for (database.models.Channel channel : dbChannels) {
             if ((channel.getParticipantA().getName().equals(pName1) && channel.getParticipantB().getName().equals(pName2))
                     || (channel.getParticipantA().getName().equals(pName2) && channel.getParticipantB().getName().equals(pName1))) {
@@ -89,7 +92,7 @@ public class SecurityAgency {
         if (pName1.equals(pName2)) {
             return pName1 + " and " + pName2 + " are identical - cannot create channel on itself";
         }
-        List<String> partNames = msadbService.getParticipants().stream().map(database.models.Participant::getName).collect(Collectors.toList());
+        List<String> partNames = dbService.getParticipants().stream().map(database.models.Participant::getName).collect(Collectors.toList());
         if (!partNames.contains(pName1)) {
             return pName1 + " is not a known participant";
         }
@@ -102,7 +105,7 @@ public class SecurityAgency {
     }
 
     private void addChannel(String name, String pName1, String pName2) {
-        msadbService.insertChannel(name, pName1, pName2);
+        dbService.insertChannel(name, pName1, pName2);
 
         Participant participantA = participants.get(pName1);
         Participant participantB = participants.get(pName2);
@@ -115,16 +118,16 @@ public class SecurityAgency {
     }
 
     public String showChannel() {
-        return msadbService.getChannels().stream()
+        return dbService.getChannels().stream()
                 .map(channel ->
                         channel.getName() + "\t | " + channel.getParticipantA().getName() + "\t and " + channel.getParticipantB().getName()
                 ).collect(Collectors.joining("\n"));
     }
 
     public String dropChannel(String name) {
-        List<String> channelNames = msadbService.getChannels().stream().map(database.models.Channel::getName).collect(Collectors.toList());
+        List<String> channelNames = dbService.getChannels().stream().map(database.models.Channel::getName).collect(Collectors.toList());
         if (channelNames.contains(name)) {
-            msadbService.dropChannel(name);
+            dbService.dropChannel(name);
             for (Participant participant : participants.values()) {
                 participant.removeChanel(name);
             }
@@ -152,7 +155,7 @@ public class SecurityAgency {
         Participant participantA = participants.get(pName1);
         Participant participantB = participants.get(pName2);
 
-        List<Channel> channels = msadbService.getChannels();
+        List<Channel> channels = dbService.getChannels();
         Channel channel = null;
         for (Channel ch : channels) {
             if ((ch.getParticipantA().getName().equals(pName1) && ch.getParticipantB().getName().equals(pName2))

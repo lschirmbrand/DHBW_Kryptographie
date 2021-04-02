@@ -14,7 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum MSADBService implements IMSADBService {
+public enum HSQLDBService implements IDBService {
     instance;
 
     private final HSQLDB db = HSQLDB.instance;
@@ -49,10 +49,10 @@ public enum MSADBService implements IMSADBService {
     public void dropChannel(String channelName) {
         try {
             Statement statement = conn.createStatement();
-            String sql = "DELETE FROM CHANNEL WHERE name='" + channelName+"'";
-            ResultSet resultSet = statement.executeQuery(sql);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            String sql = "DELETE FROM CHANNEL WHERE name='" + channelName + "'";
+            statement.executeQuery(sql);
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
     }
 
@@ -301,7 +301,7 @@ public enum MSADBService implements IMSADBService {
     public String getOneParticipantType(String participantName) {
         if (participantName == null) return null;
         participantName = participantName.toLowerCase();
-        int typeID = -1;
+        int typeID;
         try (Statement statement = conn.createStatement()) {
             String sqlStatement = "SELECT TYPE_ID from PARTICIPANTS where name='" + participantName + "'";
             try (ResultSet resultSet = statement.executeQuery(sqlStatement)) {
@@ -310,8 +310,7 @@ public enum MSADBService implements IMSADBService {
                 }
                 typeID = resultSet.getInt("TYPE_ID");
             }
-            String typeName = getTypeName(typeID);
-            return typeName;
+            return getTypeName(typeID);
 
         } catch (SQLException sqlException) {
             System.out.println(sqlException.getMessage());
