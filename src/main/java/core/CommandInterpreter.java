@@ -10,32 +10,63 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandInterpreter {
+    private final SecurityAgency securityAgency;
     Map<String, Function<List<String>, String>> regexMap;
 
     public CommandInterpreter(SecurityAgency securityAgency) {
-
+        this.securityAgency = securityAgency;
         regexMap = Map.of(
-                "encrypt message \"(.*)\" using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
-                groups -> securityAgency.encrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2)),
-                "decrypt message \"(.*)\" using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
-                groups -> securityAgency.decrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2)),
-                "crack encrypted message \"(.*)\" using (shift)",
-                groups -> securityAgency.crackShift(groups.get(0)),
-                "crack encrypted message \"(.*)\" using (rsa) and keyfile ([A-Za-z0-9]*.json)",
-                groups -> securityAgency.crackRSA(groups.get(0), groups.get(2)),
-                "register participant (.*) with type (normal|intruder)",
-                groups -> securityAgency.registerParticipant(groups.get(0), getParticipantType(groups.get(1))),
-                "create channel (.*) from (.*) to (.*)",
-                groups -> securityAgency.createChannel(groups.get(0), groups.get(1), groups.get(2)),
-                "show channel",
-                groups -> securityAgency.showChannel(),
-                "drop channel (.*)",
-                groups -> securityAgency.dropChannel(groups.get(0)),
-                "intrude channel (.*) by (.*)",
-                groups -> securityAgency.intrudeChannel(groups.get(0), groups.get(1)),
-                "send message \"(.*)\" from (.*) to (.*) using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)",
-                groups -> securityAgency.sendMessage(groups.get(0), groups.get(1), groups.get(2), getAlgorithm(groups.get(3)), groups.get(4))
+                "encrypt message \"(.*)\" using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)", this::encryptMessage,
+                "decrypt message \"(.*)\" using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)", this::decryptMessage,
+                "crack encrypted message \"(.*)\" using (shift)", this::crackShift,
+                "crack encrypted message \"(.*)\" using (rsa) and keyfile ([A-Za-z0-9]*.json)", this::crackRSA,
+                "register participant (.*) with type (normal|intruder)", this::registerParticipant,
+                "create channel (.*) from (.*) to (.*)", this::createChannel,
+                "show channel", this::showChannel,
+                "drop channel (.*)", this::dropChannel,
+                "intrude channel (.*) by (.*)", this::intrudeChannel,
+                "send message \"(.*)\" from (.*) to (.*) using (rsa|shift) and keyfile ([A-Za-z0-9]*.json)", this::sendMessage
         );
+    }
+
+    private String encryptMessage(List<String> groups) {
+        return this.securityAgency.encrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2));
+    }
+
+    private String decryptMessage(List<String> groups) {
+        return this.securityAgency.decrypt(groups.get(0), getAlgorithm(groups.get(1)), groups.get(2));
+    }
+
+    private String crackShift(List<String> groups) {
+        return this.securityAgency.crackShift(groups.get(0));
+    }
+
+    private String crackRSA(List<String> groups) {
+        return this.securityAgency.crackRSA(groups.get(0), groups.get(2));
+    }
+
+    private String registerParticipant(List<String> groups) {
+        return this.securityAgency.registerParticipant(groups.get(0), getParticipantType(groups.get(1)));
+    }
+
+    private String createChannel(List<String> groups) {
+        return this.securityAgency.createChannel(groups.get(0), groups.get(1), groups.get(2));
+    }
+
+    private String showChannel(List<String> groups) {
+        return this.securityAgency.showChannel();
+    }
+
+    private String dropChannel(List<String> groups) {
+        return securityAgency.dropChannel(groups.get(0));
+    }
+
+    private String intrudeChannel(List<String> groups) {
+        return securityAgency.intrudeChannel(groups.get(0), groups.get(1));
+    }
+
+    private String sendMessage(List<String> groups) {
+        return securityAgency.sendMessage(groups.get(0), groups.get(1), groups.get(2), getAlgorithm(groups.get(3)), groups.get(4));
     }
 
     public String interpret(String command) {
