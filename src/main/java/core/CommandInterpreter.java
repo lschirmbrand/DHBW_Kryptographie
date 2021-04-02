@@ -1,17 +1,19 @@
 package core;
 
+import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
+import core.participant.Participant;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandInterpreter {
     private final SecurityAgency securityAgency;
-    Map<String, Function<List<String>, String>> regexMap;
+    Map<String, Consumer<List<String>>> regexMap;
 
     public CommandInterpreter(SecurityAgency securityAgency) {
         this.securityAgency = securityAgency;
@@ -29,16 +31,20 @@ public class CommandInterpreter {
         );
     }
 
-    public String interpret(String command) {
+    public void interpret(String command) {
 
-        for (Map.Entry<String, Function<List<String>, String>> entry : regexMap.entrySet()) {
+        Configuration.instance.guiLogger.log("-------------------------------");
+
+
+        for (Map.Entry<String, Consumer<List<String>>> entry : regexMap.entrySet()) {
             List<String> groups = match(entry.getKey(), command);
             if (groups != null) {
-                return entry.getValue().apply(groups);
+                entry.getValue().accept(groups);
+                return;
             }
         }
 
-        return "unknown command";
+        Configuration.instance.guiLogger.log("unknown command");
     }
 
     private List<String> match(String regex, String command) {
@@ -54,32 +60,32 @@ public class CommandInterpreter {
         return null;
     }
 
-    private String encryptMessage(List<String> groups) {
+    private void encryptMessage(List<String> groups) {
         String message = groups.get(0);
         EncryptionAlgorithm algorithm = getAlgorithm(groups.get(1));
         String keyFilename = groups.get(2);
-        return this.securityAgency.encrypt(message, algorithm, keyFilename);
+        Configuration.instance.guiLogger.log(this.securityAgency.encrypt(message, algorithm, keyFilename));
     }
 
-    private String decryptMessage(List<String> groups) {
+    private void decryptMessage(List<String> groups) {
         String message = groups.get(0);
         EncryptionAlgorithm algorithm = getAlgorithm(groups.get(1));
         String keyFilename = groups.get(2);
-        return this.securityAgency.decrypt(message, algorithm, keyFilename);
+        Configuration.instance.guiLogger.log(this.securityAgency.decrypt(message, algorithm, keyFilename));
     }
 
-    private String crackShift(List<String> groups) {
+    private void crackShift(List<String> groups) {
         String message = groups.get(0);
-        return this.securityAgency.crackShift(message);
+        Configuration.instance.guiLogger.log(this.securityAgency.crackShift(message));
     }
 
-    private String crackRSA(List<String> groups) {
+    private void crackRSA(List<String> groups) {
         String message = groups.get(0);
         String keyFilename = groups.get(2);
-        return this.securityAgency.crackRSA(message, keyFilename);
+        Configuration.instance.guiLogger.log(this.securityAgency.crackRSA(message, keyFilename));
     }
 
-    private String registerParticipant(List<String> groups) {
+    private void registerParticipant(List<String> groups) {
         String name = groups.get(0);
         String type = groups.get(1);
         Participant.Type participantType = switch (type) {
@@ -87,38 +93,38 @@ public class CommandInterpreter {
             case "intruder" -> Participant.Type.INTRUDER;
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
-        return this.securityAgency.registerParticipant(name, participantType);
+        Configuration.instance.guiLogger.log(this.securityAgency.registerParticipant(name, participantType));
     }
 
-    private String createChannel(List<String> groups) {
+    private void createChannel(List<String> groups) {
         String name = groups.get(0);
         String pName1 = groups.get(1);
         String pName2 = groups.get(2);
-        return this.securityAgency.createChannel(name, pName1, pName2);
+        Configuration.instance.guiLogger.log(this.securityAgency.createChannel(name, pName1, pName2));
     }
 
-    private String showChannel(List<String> groups) {
-        return this.securityAgency.showChannel();
+    private void showChannel(List<String> groups) {
+        Configuration.instance.guiLogger.log(this.securityAgency.showChannel());
     }
 
-    private String dropChannel(List<String> groups) {
+    private void dropChannel(List<String> groups) {
         String name = groups.get(0);
-        return securityAgency.dropChannel(name);
+        Configuration.instance.guiLogger.log(securityAgency.dropChannel(name));
     }
 
-    private String intrudeChannel(List<String> groups) {
+    private void intrudeChannel(List<String> groups) {
         String name = groups.get(0);
         String part = groups.get(1);
-        return securityAgency.intrudeChannel(name, part);
+        Configuration.instance.guiLogger.log(securityAgency.intrudeChannel(name, part));
     }
 
-    private String sendMessage(List<String> groups) {
+    private void sendMessage(List<String> groups) {
         String message = groups.get(0);
         String pName1 = groups.get(1);
         String pName2 = groups.get(2);
         EncryptionAlgorithm algorithm = getAlgorithm(groups.get(3));
         String keyfileName = groups.get(4);
-        return securityAgency.sendMessage(message, pName1, pName2, algorithm, keyfileName);
+        Configuration.instance.guiLogger.log(securityAgency.sendMessage(message, pName1, pName2, algorithm, keyfileName));
     }
 
     private EncryptionAlgorithm getAlgorithm(String arg) {

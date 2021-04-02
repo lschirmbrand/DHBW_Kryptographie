@@ -1,6 +1,7 @@
 package core;
 
 import configuration.EncryptionAlgorithm;
+import core.participant.Participant;
 
 public class ChannelEvent {
     private final String message;

@@ -1,5 +1,7 @@
 package configuration;
 
+import gui.GUILogger;
+
 public enum Configuration {
     instance;
 
@@ -35,15 +37,9 @@ public enum Configuration {
     public final String dbPassword = "";
 
 
+    public GUILogger guiLogger;
+    public boolean debugMode;
+
     // Log-Directory
-    public final String logsDirectory = userDirectory + fileSeparator + "log";
-
-
-    public void enableLogging() {
-
-    }
-
-    public void disableLogging() {
-
-    }
+    public final String logsDirectory = userDirectory + fileSeparator + "log" + fileSeparator;
 }

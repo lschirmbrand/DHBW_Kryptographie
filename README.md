@@ -13,8 +13,9 @@ Decryption
 Cracking 
 
 - `crack encrypted message "fS0zIA==" using rsa and keyfile rsa32.json`
+- `crack encrypted message "cAsL20KTnZ0m4wz9xqdtaT4fPJUZf2boYYjrpnHep8g=" using rsa and keyfile rsa64.json`
 
-Register Participants
+  Register Participants
 
 - `register participant branch_hkg with type normal`
 - `register participant branch_cpt with type normal`
@@ -34,3 +35,10 @@ Create Channels
 crack encrypted message "fS0zIA==" using rsa and keyfile rsa32.json
 
 send message "test" from branch_hkg to branch_cpt using rsa and keyfile rsa256.json
+
+send message "vaccine for covid is stored in building abc" from branch_cpt to branch_syd using rsa and keyfile rsa1024.json
+
+
+
+encrypt message "vaccine for covid is stored in building abc" using shift and keyfile shift3.json
+crack encrypted message "ydfflqh iru frylg lv vwruhg lq exloglqj def" using shift

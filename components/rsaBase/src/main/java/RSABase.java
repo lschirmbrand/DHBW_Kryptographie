@@ -24,18 +24,57 @@ public class RSABase {
 
     private String encryptMessage(String plainMessage, File publicKeyfile) throws FileNotFoundException {
         readPublicKeyFile(publicKeyfile);
+        System.out.println("Encrypting using rsa");
+        System.out.println("plain message: \"" + plainMessage + "\"");
+        System.out.println("n: " + key.getN());
+        System.out.println("e: " + key.getE());
 
         byte[] bytes = plainMessage.getBytes(Charset.defaultCharset());
+        StringBuilder sb = new StringBuilder("message in bytes: ");
+        for (byte b : bytes) {
+            sb.append(String.format("%02X ", b));
+        }
+        System.out.println(sb);
+
+        System.out.println("m ^ e mod n = c");
+
         byte[] encrypted = crypt(new BigInteger(bytes), key).toByteArray();
-        return Base64.getEncoder().encodeToString(encrypted);
+        sb = new StringBuilder("cypher in bytes: ");
+        for (byte b : encrypted) {
+            sb.append(String.format("%02X ", b));
+        }
+        System.out.println(sb);
+
+        String cypherBase64 = Base64.getEncoder().encodeToString(encrypted);
+        System.out.println("cypher in Base64: " + cypherBase64);
+        return cypherBase64;
     }
 
     private String decryptMessage(String encryptedMessage, File privateKeyfile) throws FileNotFoundException {
         readPrivateKeyFile(privateKeyfile);
+        System.out.println("Decrypting using rsa");
+        System.out.println("cypher: \"" + encryptedMessage + "\"");
+        System.out.println("n: " + key.getN());
+        System.out.println("d: " + key.getE());
 
         byte[] cipher = Base64.getDecoder().decode(encryptedMessage);
+        StringBuilder sb = new StringBuilder("cypher in bytes: ");
+        for (byte b : cipher) {
+            sb.append(String.format("%02X ", b));
+        }
+        System.out.println(sb);
+
+        System.out.println("c ^ d mod n = e");
         byte[] msg = crypt(new BigInteger(cipher), key).toByteArray();
-        return new String(msg);
+        sb = new StringBuilder("message in bytes: ");
+        for (byte b : msg) {
+            sb.append(String.format("%02X ", b));
+        }
+        System.out.println(sb);
+
+        String msgStr = new String(msg);
+        System.out.println("message in Text: " + msgStr);
+        return msgStr;
     }
 
     private BigInteger crypt(BigInteger message, Key key) {

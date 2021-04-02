@@ -4,39 +4,61 @@ import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 
 public class Encryption {
-    private static BaseFactory baseFactory = new BaseFactory();
-    private static CrackerFactory crackerFactory = new CrackerFactory();
+    private static final BaseFactory baseFactory = new BaseFactory();
+    private static final CrackerFactory crackerFactory = new CrackerFactory();
+    private static final PrintStream consoleOut = System.out;
 
     public static String encrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
         Object encryptPort = baseFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
+        if (Configuration.instance.debugMode) {
+            switchSystemOut(false, algorithm);
+        }
+
+        String res;
         try {
-            return (String) encryptPort.getClass()
+            res = (String) encryptPort.getClass()
                     .getMethod("encrypt", String.class, File.class)
                     .invoke(encryptPort, message, keyFile);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error while encrypting";
+            res = "Error while encrypting";
         }
+        if (Configuration.instance.debugMode) {
+
+            resetSystemOut();
+        }
+        return res;
     }
 
     public static String decrypt(String message, EncryptionAlgorithm algorithm, String keyFilename) {
         Object encryptPort = baseFactory.build(algorithm);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
-
+        if (Configuration.instance.debugMode) {
+            switchSystemOut(true, algorithm);
+        }
+        String res;
         try {
-            return (String) encryptPort.getClass()
+            res = (String) encryptPort.getClass()
                     .getMethod("decrypt", String.class, File.class)
                     .invoke(encryptPort, message, keyFile);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error while encrypting";
+            res = "Error while encrypting";
         }
+        if (Configuration.instance.debugMode) {
+            resetSystemOut();
+        }
+        return res;
     }
 
     public static String crackShift(String message) {
@@ -52,7 +74,7 @@ public class Encryption {
         }
     }
 
-    public static String crackRSA(String message, String keyFilename) {
+    public static String crackRSA(String message, String keyFilename) throws RSACrackingException {
         Object crackerPort = crackerFactory.build(EncryptionAlgorithm.RSA);
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
@@ -62,9 +84,27 @@ public class Encryption {
                     .getMethod("decrypt", String.class, File.class)
                     .invoke(crackerPort, message, keyFile);
             return (crackedMessage != null) ? crackedMessage : "cracking encrypted message \"" + message + "\" failed";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error while cracking";
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RSACrackingException();
         }
+    }
+
+
+    private static void switchSystemOut(boolean decrypt, EncryptionAlgorithm algorithm) {
+        File logDir = new File(Configuration.instance.logsDirectory);
+        if (!logDir.exists()) {
+            logDir.mkdirs();
+        }
+
+        String fileName = Configuration.instance.logsDirectory + (decrypt ? "decrypt_" : "encrypt_") + algorithm.name().toLowerCase() + "_" + new Date().getTime() + ".txt";
+        try {
+            System.setOut(new PrintStream(fileName));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void resetSystemOut() {
+        System.setOut(consoleOut);
     }
 }

@@ -70,7 +70,7 @@ public class ShiftCracker {
             }
         }
 
-        return String.join(", ", possibilities);
+        return String.join("\n   | ", possibilities);
     }
 
 
@@ -149,7 +149,7 @@ public class ShiftCracker {
         }
 
         if (eFrequency / frequency >= 0.05 || aFrequency / frequency >= 0.05 || iFrequency / frequency >= 0.05 || oFrequency / frequency >= 0.05 || uFrequency / frequency >= 0.05) {
-            return (stringBuilder.toString());
+            return (stringBuilder.toString().toLowerCase());
             //System.out.println("\t\tA : " + decimalFormat.format(aFrequency / frequency));
             //System.out.println("\t\tE : " + decimalFormat.format(eFrequency / frequency));
             //System.out.println("\t\tI : " + decimalFormat.format(iFrequency / frequency));

@@ -1,16 +1,18 @@
-package core;
+package core.participant;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import configuration.EncryptionAlgorithm;
+import core.ChannelEvent;
 import core.encryption.Encryption;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Participant {
-    private final String name;
-    private final Type type;
+public abstract class Participant {
+    protected final String name;
+    protected final Type type;
+
 
     private final Map<String, EventBus> channels = new HashMap<>();
 
@@ -25,7 +27,7 @@ public class Participant {
     }
 
     public void removeChanel(String name) {
-        if(channels.containsKey(name)) {
+        if (channels.containsKey(name)) {
             EventBus channel = channels.get(name);
             channels.remove(name);
             channel.unregister(this);
@@ -40,18 +42,14 @@ public class Participant {
         return type;
     }
 
-    public void sendMessage(String message, String name, EncryptionAlgorithm algorithm, String keyfileName) {
+    public String sendMessage(String message, String name, EncryptionAlgorithm algorithm, String keyfileName) {
         String encrypted = Encryption.encrypt(message, algorithm, keyfileName);
         channels.get(name).post(new ChannelEvent(encrypted, algorithm, keyfileName, this));
+        return encrypted;
     }
 
     @Subscribe
-    public void receive(ChannelEvent event) {
-        if(!event.getSender().equals(this)) {
-            String decrypted = Encryption.decrypt(event.getMessage(), event.getAlgorithm(), event.getKeyfile());
-            System.out.println(name + " received new message: " + decrypted);
-        }
-    }
+    public abstract void receive(ChannelEvent event);
 
     public enum Type {
         NORMAL("normal"), INTRUDER("intruder");

@@ -72,15 +72,16 @@ public class GUI extends Application {
         switch (keyCode) {
             case F3:
                 if (guiController.isLoggingEnabled()) {
-                    guiController.disableLogging();
+                    guiController.disableDebug();
                 } else {
-                    guiController.enableLogging();
+                    guiController.enableDebug();
                 }
                 break;
             case F5:
                 guiController.executeCommand(inputArea.getText());
                 break;
             case F8:
+                guiController.showLogFile();
                 break;
             default:
                 break;

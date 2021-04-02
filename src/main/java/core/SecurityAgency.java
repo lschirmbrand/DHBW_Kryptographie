@@ -3,10 +3,17 @@ package core;
 import com.google.common.eventbus.EventBus;
 import configuration.EncryptionAlgorithm;
 import core.encryption.Encryption;
+import core.encryption.RSACrackingException;
+import core.participant.IntruderParticipant;
+import core.participant.NormalParticipant;
+import core.participant.Participant;
 import database.HSQLDBService;
 import database.IDBService;
 import database.models.Channel;
+import database.models.Message;
+import database.models.PostboxMessage;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +40,17 @@ public class SecurityAgency {
     }
 
     private void setupParticipants() {
-        for (database.models.Participant participant : dbService.getParticipants()) {
-            Participant.Type type = switch (participant.getType()) {
+        for (database.models.Participant p : dbService.getParticipants()) {
+            Participant.Type type = switch (p.getType()) {
                 case "normal" -> Participant.Type.NORMAL;
                 case "intruder" -> Participant.Type.INTRUDER;
-                default -> throw new IllegalStateException("Unexpected value: " + participant.getType());
+                default -> throw new IllegalStateException("Unexpected value: " + p.getType());
             };
-            participants.put(participant.getName(), new Participant(participant.getName(), type));
+            Participant participant = switch (type) {
+                case NORMAL -> new NormalParticipant(p.getName(), type);
+                case INTRUDER -> new IntruderParticipant(p.getName(), type);
+            };
+            participants.put(participant.getName(), participant);
         }
     }
 
@@ -62,7 +73,11 @@ public class SecurityAgency {
     }
 
     public String crackRSA(String message, String keyFilename) {
-        return Encryption.crackRSA(message, keyFilename);
+        try {
+            return Encryption.crackRSA(message, keyFilename);
+        } catch (RSACrackingException e) {
+            return "cracking encryped message \"" + message + "\" failed";
+        }
     }
 
     public String registerParticipant(String name, Participant.Type type) {
@@ -74,7 +89,13 @@ public class SecurityAgency {
         }
 
         dbService.insertParticipant(name, type.getValue());
-        participants.put(name, new Participant(name, type));
+
+        Participant participant = switch (type) {
+            case NORMAL -> new NormalParticipant(name, type);
+            case INTRUDER -> new IntruderParticipant(name, type);
+        };
+
+        participants.put(name, participant);
         return "participant " + name + " with type " + type.getValue() + " registered and postbox_" + name + " created";
     }
 
@@ -147,7 +168,7 @@ public class SecurityAgency {
         }
 
         participant.addChanel(name, channels.get(name));
-        return "";
+        return "participant " + part + " intruded channel " + name;
     }
 
     public String sendMessage(String message, String pName1, String pName2, EncryptionAlgorithm algorithm, String keyfileName) {
@@ -167,10 +188,14 @@ public class SecurityAgency {
             return "no valid channel from " + pName1 + " to " + pName2;
         }
 
-        participantA.sendMessage(message, channel.getName(), algorithm, keyfileName);
+        String encryptedMessage = participantA.sendMessage(message, channel.getName(), algorithm, keyfileName);
+
+        Message dbMessage = new Message(channel.getParticipantA(), channel.getParticipantB(), algorithm.name().toLowerCase(), keyfileName, new Date().toString(), message, encryptedMessage);
+
+        dbService.insertMessage(dbMessage);
 
 
-        return "";
+        return null;
     }
 
 

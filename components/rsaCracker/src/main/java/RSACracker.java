@@ -14,7 +14,6 @@ public class RSACracker {
     private BigInteger n = BigInteger.ZERO;
 
     private Date start;
-
     public Port port;
 
     private RSACracker() {
@@ -31,12 +30,12 @@ public class RSACracker {
             return null;
         }
 
-        public String decrypt(String encryptedMessage, File publicKeyfile) throws FileNotFoundException {
+        public String decrypt(String encryptedMessage, File publicKeyfile) throws FileNotFoundException, RSACrackingTimeoutException {
             return decryptMessage(encryptedMessage, publicKeyfile);
         }
     }
 
-    private String decryptMessage(String encryptedMessage, File publicKeyfile) throws FileNotFoundException {
+    private String decryptMessage(String encryptedMessage, File publicKeyfile) throws FileNotFoundException, RSACrackingTimeoutException {
         start = new Date();
         readKeyFile(publicKeyfile);
 
@@ -81,7 +80,7 @@ public class RSACracker {
         return new BigInteger(line);
     }
 
-    private BigInteger execute(BigInteger cipher) throws RSACrackingException {
+    private BigInteger execute(BigInteger cipher) throws RSACrackingException, RSACrackingTimeoutException {
         BigInteger p, q, d;
         List<BigInteger> factorList = factorize(n);
 
@@ -99,7 +98,7 @@ public class RSACracker {
         return cipher.modPow(d, n);
     }
 
-    public List<BigInteger> factorize(BigInteger n) throws RSACrackingException {
+    public List<BigInteger> factorize(BigInteger n) throws RSACrackingException, RSACrackingTimeoutException {
         BigInteger two = BigInteger.valueOf(2);
         List<BigInteger> factorList = new LinkedList<>();
 
@@ -134,9 +133,9 @@ public class RSACracker {
         return factorList;
     }
 
-    private void checkMaxTime() throws RSACrackingException {
+    private void checkMaxTime() throws RSACrackingTimeoutException {
         if ((new Date().getTime() - start.getTime()) / 1000 > 30) {
-            throw new RSACrackingException("Cracking took to long");
+            throw new RSACrackingTimeoutException();
         }
     }
 }
