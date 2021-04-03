@@ -54,21 +54,21 @@ public enum HSQLDBService implements IDBService {
         StringBuilder sb = new StringBuilder();
         if (getAlgorithmID(algorithm) > 0) return;
         sb.append("INSERT INTO algorithms (").append("name").append(")");
-        sb.append(" VALUES ('").append(algorithm).append(')');
+        sb.append(" VALUES ('").append(algorithm).append("')");
         System.out.println("SQL-Statement Builder: " + sb.toString());
         db.update(sb.toString());
     }
 
     @Override
     public void insertMessage(String participantSender, String participantReceiver, String algorithm, String keyFile, String plainMessage, String encryptedMessage) {
+        if (!getAlgorithms().contains(algorithm)) {
+            insertAlgorithm(algorithm);
+        }
+
         int participantFromID = getParticipantID(participantSender);
         int participantToID = getParticipantID(participantReceiver);
         int algorithmID = getAlgorithmID(algorithm);
         long timeStamp = Instant.now().getEpochSecond();
-
-        if (!getAlgorithms().contains(algorithm)) {
-            insertAlgorithm(algorithm);
-        }
 
         StringBuilder sqlStringBuilder = new StringBuilder();
         sqlStringBuilder.append("INSERT INTO messages (PARTICIPANT_FROM_ID, PARTICIPANT_TO_ID, PLAIN_MESSAGE, ALGORITHM_ID, ENCRYPTED_MESSAGE, KEYFILE, TIMESTAMP)");
