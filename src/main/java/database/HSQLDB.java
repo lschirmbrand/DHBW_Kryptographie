@@ -1,9 +1,6 @@
 package database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public enum HSQLDB {
     instance;
@@ -26,14 +23,21 @@ public enum HSQLDB {
         }
     }
 
-    private synchronized void update(String sqlStatement) {
+    public synchronized void update(String sqlStatement) {
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(sqlStatement);
             statement.close();
-        } catch (SQLException sqle) {
-            System.out.println(sqle.getMessage());
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
+    }
+
+    public synchronized ResultSet select(String sqlStatement) throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(sqlStatement);
+        statement.close();
+        return resultSet;
     }
 
     /*
@@ -259,7 +263,4 @@ public enum HSQLDB {
         createTablePostbox("msa");
     }
 
-    public void outerUpdate(String sqlStatement) {
-        update(sqlStatement);
-    }
 }

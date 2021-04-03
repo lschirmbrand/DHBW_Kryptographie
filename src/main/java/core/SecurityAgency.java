@@ -1,22 +1,16 @@
 package core;
 
-import com.google.common.eventbus.EventBus;
 import configuration.EncryptionAlgorithm;
 import core.encryption.Encryption;
 import core.encryption.RSACrackingException;
-import core.participant.IntruderParticipant;
-import core.participant.NormalParticipant;
-import core.participant.Participant;
 import database.HSQLDBService;
 import database.IDBService;
 import database.models.Channel;
 import database.models.Message;
-import database.models.PostboxMessage;
+import network.*;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SecurityAgency {
@@ -25,38 +19,37 @@ public class SecurityAgency {
 
     private final IDBService dbService;
 
-    private final Map<String, Participant> participants;
-    private final Map<String, EventBus> channels;
+//    private final Map<String, Participant> participants;
+//    private final Map<String, EventBus> channels;
+
+    private final INetwork network;
 
     public SecurityAgency() {
         interpreter = new CommandInterpreter(this);
         dbService = HSQLDBService.instance;
-        dbService.setupConnection();
+        dbService.setup();
 
-        participants = new HashMap<>();
-        channels = new HashMap<>();
+        network = new Network();
+
+//        participants = new HashMap<>();
+//        channels = new HashMap<>();
         setupParticipants();
         setupChannels();
     }
 
     private void setupParticipants() {
         for (database.models.Participant p : dbService.getParticipants()) {
-            Participant.Type type = switch (p.getType()) {
-                case "normal" -> Participant.Type.NORMAL;
-                case "intruder" -> Participant.Type.INTRUDER;
-                default -> throw new IllegalStateException("Unexpected value: " + p.getType());
-            };
-            Participant participant = switch (type) {
-                case NORMAL -> new NormalParticipant(p.getName(), type);
-                case INTRUDER -> new IntruderParticipant(p.getName(), type);
-            };
-            participants.put(participant.getName(), participant);
+            network.addParticipant(p.getName(), p.getType());
         }
     }
 
     private void setupChannels() {
         for (Channel channel : dbService.getChannels()) {
-            addChannel(channel.getName(), channel.getParticipantA().getName(), channel.getParticipantB().getName());
+
+            Participant pA = network.getParticipant(channel.getParticipantA().getName());
+            Participant pB = network.getParticipant(channel.getParticipantB().getName());
+
+            network.addChannel(channel.getName(), pA, pB);
         }
     }
 
@@ -80,62 +73,48 @@ public class SecurityAgency {
         }
     }
 
-    public String registerParticipant(String name, Participant.Type type) {
-        if (participants.containsKey(name)) {
+    public String registerParticipant(String name, String type) {
+        if (network.getParticipant(name) != null) {
             return "participant " + name + " already exists, using existing postbox_" + name;
         }
-        if (!dbService.getTypes().contains(type.getValue())) {
-            dbService.insertType(type.getValue());
-        }
 
-        dbService.insertParticipant(name, type.getValue());
+        dbService.insertParticipant(name, type);
+        network.addParticipant(name, type);
 
-        Participant participant = switch (type) {
-            case NORMAL -> new NormalParticipant(name, type);
-            case INTRUDER -> new IntruderParticipant(name, type);
-        };
-
-        participants.put(name, participant);
-        return "participant " + name + " with type " + type.getValue() + " registered and postbox_" + name + " created";
+        return "participant " + name + " with type " + type + " registered and postbox_" + name + " created";
     }
 
     public String createChannel(String name, String pName1, String pName2) {
-        if (channels.containsKey(name)) {
+        if (network.getChannel(name) != null) {
             return "channel " + name + " already exists";
         }
-        List<database.models.Channel> dbChannels = dbService.getChannels();
-        for (database.models.Channel channel : dbChannels) {
-            if ((channel.getParticipantA().getName().equals(pName1) && channel.getParticipantB().getName().equals(pName2))
-                    || (channel.getParticipantA().getName().equals(pName2) && channel.getParticipantB().getName().equals(pName1))) {
-                return "communication channel between " + pName1 + " and " + pName2 + " already exists";
-            }
-        }
+
         if (pName1.equals(pName2)) {
             return pName1 + " and " + pName2 + " are identical - cannot create channel on itself";
         }
-        List<String> partNames = dbService.getParticipants().stream().map(database.models.Participant::getName).collect(Collectors.toList());
-        if (!partNames.contains(pName1)) {
+
+        List<IChannel> channels = network.getChannels();
+
+        Participant a = network.getParticipant(pName1);
+        if (a == null) {
             return pName1 + " is not a known participant";
         }
-        if (!partNames.contains(pName2)) {
+        Participant b = network.getParticipant(pName2);
+        if (b == null) {
             return pName2 + " is not a known participant";
         }
-        addChannel(name, pName1, pName2);
 
-        return "channel " + name + "from " + pName1 + " to " + pName2 + " successfully created";
-    }
+        for (IChannel channel : channels) {
+            List<Participant> participants = channel.getParticipants();
+            if (participants.contains(a) && participants.contains(b)) {
+                return "communication channel between " + pName1 + " and " + pName2 + " already exists";
+            }
+        }
 
-    private void addChannel(String name, String pName1, String pName2) {
         dbService.insertChannel(name, pName1, pName2);
+        network.addChannel(name, a, b);
 
-        Participant participantA = participants.get(pName1);
-        Participant participantB = participants.get(pName2);
-
-        EventBus channel = new EventBus(name);
-        channels.put(name, channel);
-
-        participantA.addChanel(name, channel);
-        participantB.addChanel(name, channel);
+        return "channel " + name + " from " + pName1 + " to " + pName2 + " successfully created";
     }
 
     public String showChannel() {
@@ -149,9 +128,8 @@ public class SecurityAgency {
         List<String> channelNames = dbService.getChannels().stream().map(database.models.Channel::getName).collect(Collectors.toList());
         if (channelNames.contains(name)) {
             dbService.dropChannel(name);
-            for (Participant participant : participants.values()) {
-                participant.removeChanel(name);
-            }
+            network.removeChannel(name);
+
             return "channel " + name + " deleted";
         } else {
             return "unknown channel " + name;
@@ -159,43 +137,54 @@ public class SecurityAgency {
     }
 
     public String intrudeChannel(String name, String part) {
-        if (!channels.containsKey(name)) {
+        IChannel channel = network.getChannel(name);
+        if (channel == null) {
             return "unknown Channel " + name;
         }
-        Participant participant = participants.get(part);
-        if (!(participant.getType() == Participant.Type.INTRUDER)) {
+
+        Participant participant = network.getParticipant(part);
+        if (!(participant instanceof ParticipantIntruder)) {
             return "participant " + name + " is not of type intruder";
         }
 
-        participant.addChanel(name, channels.get(name));
+        network.intrudeChannel(name, (ParticipantIntruder) participant);
         return "participant " + part + " intruded channel " + name;
     }
 
-    public String sendMessage(String message, String pName1, String pName2, EncryptionAlgorithm algorithm, String keyfileName) {
+    public String sendMessage(String message, String pName1, String pName2, EncryptionAlgorithm algorithm, String
+            keyfileName) {
 
-        Participant participantA = participants.get(pName1);
-        Participant participantB = participants.get(pName2);
+        Participant a = network.getParticipant(pName1);
+        if (a == null) {
+            return pName1 + " is not a known participant";
+        }
+        Participant b = network.getParticipant(pName2);
+        if (b == null) {
+            return pName2 + " is not a known participant";
+        }
 
-        List<Channel> channels = dbService.getChannels();
-        Channel channel = null;
-        for (Channel ch : channels) {
-            if ((ch.getParticipantA().getName().equals(pName1) && ch.getParticipantB().getName().equals(pName2))
-                    || (ch.getParticipantA().getName().equals(pName2) && ch.getParticipantB().getName().equals(pName1))) {
-                channel = ch;
+        IChannel channel = null;
+
+        for (IChannel networkChannel : network.getChannels()) {
+            List<Participant> participants = networkChannel.getParticipants();
+            if (participants.contains(a) && participants.contains(b)) {
+                channel = networkChannel;
+                break;
             }
         }
         if (channel == null) {
             return "no valid channel from " + pName1 + " to " + pName2;
         }
 
-        String encryptedMessage = participantA.sendMessage(message, channel.getName(), algorithm, keyfileName);
+        String encryptedMessage = Encryption.encrypt(message, algorithm, keyfileName);
 
-        Message dbMessage = new Message(channel.getParticipantA(), channel.getParticipantB(), algorithm.name().toLowerCase(), keyfileName, new Date().toString(), message, encryptedMessage);
+        a.sendTransmission(channel, new Transmission(a.getName(), b.getName(), encryptedMessage, algorithm, keyfileName));
+
+        Message dbMessage = new Message(a.getName(), b.getName(), algorithm.name().toLowerCase(), keyfileName, new Date().toString(), message, encryptedMessage);
 
         dbService.insertMessage(dbMessage);
 
-
-        return null;
+        return "";
     }
 
 

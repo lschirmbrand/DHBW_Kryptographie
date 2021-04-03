@@ -2,7 +2,9 @@ package core;
 
 import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
-import core.participant.Participant;
+import network.Participant;
+import network.ParticipantDefault;
+import network.ParticipantIntruder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,12 +90,8 @@ public class CommandInterpreter {
     private void registerParticipant(List<String> groups) {
         String name = groups.get(0);
         String type = groups.get(1);
-        Participant.Type participantType = switch (type) {
-            case "normal" -> Participant.Type.NORMAL;
-            case "intruder" -> Participant.Type.INTRUDER;
-            default -> throw new IllegalStateException("Unexpected value: " + type);
-        };
-        Configuration.instance.guiLogger.log(this.securityAgency.registerParticipant(name, participantType));
+
+        Configuration.instance.guiLogger.log(this.securityAgency.registerParticipant(name, type));
     }
 
     private void createChannel(List<String> groups) {

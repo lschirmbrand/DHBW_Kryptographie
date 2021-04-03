@@ -9,11 +9,7 @@ import java.util.List;
 
 public interface IDBService {
 
-    void setupConnection();
-
-    void createAllTables();
-
-    void dropAllTables();
+    void setup();
 
     void shutdown();
 

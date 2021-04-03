@@ -1,5 +1,6 @@
 package network;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,12 +8,11 @@ import java.util.Map;
 public class Network implements INetwork {
 
     private final Map<String, IChannel> channels = new HashMap<>();
+    private final Map<String, Participant> participants = new HashMap<>();
 
     @Override
-    public void createChannel(String name, Participant a, Participant b) {
-        IChannel channel = new Channel(name);
-        channel.addParticipant(a);
-        channel.addParticipant(b);
+    public void addChannel(String name, Participant a, Participant b) {
+        IChannel channel = new Channel(name, a, b);
         this.channels.put(name, channel);
     }
 
@@ -22,25 +22,34 @@ public class Network implements INetwork {
     }
 
     @Override
-    public void addIntruderToChannel(String name, Participant intruder) {
-        this.channels.get(name).addParticipant(intruder);
+    public IChannel getChannel(String name) {
+        return channels.get(name);
     }
 
     @Override
-    public void sendTransmission(String name, Transmission transmission) {
-        this.channels.get(name).startTransmission(transmission);
+    public List<IChannel> getChannels() {
+        return new ArrayList<>(channels.values());
     }
+
+    @Override
+    public void addParticipant(String name, String type) {
+        Participant participant = switch (type) {
+            case "normal" -> new ParticipantDefault(name);
+            case "intruder" -> new ParticipantIntruder(name);
+            default -> throw new IllegalStateException("Unexpected value: " + type);
+        };
+
+        participants.put(name, participant);
+    }
+
+    @Override
+    public void intrudeChannel(String name, ParticipantIntruder intruder) {
+        this.channels.get(name).intrude(intruder);
+    }
+
 
     @Override
     public Participant getParticipant(String name) {
-        for (IChannel channel : this.channels.values()) {
-            List<Participant> participants = channel.getParticipants();
-
-            for (Participant participant : participants) {
-                if (participant.getName().equals(name))
-                    return participant;
-            }
-        }
-        return null;
+        return participants.get(name);
     }
 }

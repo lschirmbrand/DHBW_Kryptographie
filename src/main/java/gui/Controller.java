@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class Controller {
 
@@ -70,7 +71,13 @@ public class Controller {
     }
 
     public void executeCommand(String command) {
-        securityAgency.getInterpreter().interpret(command);
+        // one command per line
+        Stream.of(command.split(Configuration.instance.lineSeparator))
+                // filter blank lines
+                .filter(s -> !s.isBlank())
+                // execute line by line
+                .forEach(securityAgency.getInterpreter()::interpret);
+
     }
 
     public boolean isLoggingEnabled() {

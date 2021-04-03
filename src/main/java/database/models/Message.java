@@ -1,15 +1,15 @@
 package database.models;
 
 public class Message {
-    private final Participant participantSender;
-    private final Participant participantReceiver;
+    private final String participantSender;
+    private final String participantReceiver;
     private final String algorithm;
     private final String keyfile;
     private final String timestamp;
     private final String plainMessage;
     private final String encryptedMessage;
 
-    public Message(Participant participantSender, Participant participantReceiver, String algorithm, String keyfile, String timestamp, String plainMessage, String encryptedMessage) {
+    public Message(String participantSender, String participantReceiver, String algorithm, String keyfile, String timestamp, String plainMessage, String encryptedMessage) {
         this.participantSender = participantSender;
         this.participantReceiver = participantReceiver;
         this.algorithm = algorithm;
@@ -19,11 +19,11 @@ public class Message {
         this.encryptedMessage = encryptedMessage;
     }
 
-    public Participant getParticipantSender() {
+    public String getParticipantSender() {
         return this.participantSender;
     }
 
-    public Participant getParticipantReceiver() {
+    public String getParticipantReceiver() {
         return this.participantReceiver;
     }
 

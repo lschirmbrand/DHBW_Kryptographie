@@ -1,15 +1,28 @@
 package network;
 
-import com.google.common.eventbus.Subscribe;
+import configuration.Configuration;
+import core.encryption.Encryption;
+import core.encryption.RSACrackingException;
 
 public class ParticipantIntruder extends Participant {
     public ParticipantIntruder(String name) {
         super(name);
     }
 
-    @Subscribe
     @Override
     public void receive(Transmission transmission) {
-        // Intruder way of receiving
+        if (!isTransmissionReceiver(transmission)) {
+            try {
+                String decrypted = switch (transmission.getAlgorithm()) {
+                    case RSA -> Encryption.crackRSA(transmission.getMessage(), transmission.getKeyFilePath());
+                    case SHIFT -> Encryption.crackShift(transmission.getMessage());
+                };
+
+                Configuration.instance.guiLogger.log("intruder " + getName() + " cracked message from participant " + transmission.getSender() + " | " + decrypted);
+
+            } catch (RSACrackingException e) {
+                Configuration.instance.guiLogger.log("intruder " + getName() + " | crack message from participant " + transmission.getSender() + " failed");
+            }
+        }
     }
 }

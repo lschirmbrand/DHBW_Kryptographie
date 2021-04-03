@@ -2,19 +2,28 @@ package network;
 
 import com.google.common.eventbus.EventBus;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class Channel implements IChannel {
 
     private final String name;
     private final EventBus eventBus;
-    private final List<Participant> participants;
+    private final Participant participantA;
+    private final Participant participantB;
 
-    public Channel(String name) {
+    public Channel(String name, Participant participantA, Participant participantB) {
         this.name = name;
+        this.participantA = participantA;
+        this.participantB = participantB;
         this.eventBus = new EventBus();
-        this.participants = new LinkedList<>();
+
+        eventBus.register(participantA);
+        eventBus.register(participantB);
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -23,18 +32,14 @@ public class Channel implements IChannel {
     }
 
     @Override
-    public void addParticipant(Participant participant) {
-        this.participants.add(participant);
-        addToEventBuss(participant);
-    }
-
-    @Override
-    public void addToEventBuss(Participant participant) {
-        eventBus.register(participant);
+    public void intrude(ParticipantIntruder intruder) {
+        eventBus.register(intruder);
     }
 
     @Override
     public List<Participant> getParticipants() {
-        return this.participants;
+        return List.of(participantA, participantB);
     }
+
+
 }

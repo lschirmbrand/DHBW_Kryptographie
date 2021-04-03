@@ -18,8 +18,10 @@ public abstract class Participant {
         return name;
     }
 
-    @Subscribe
-    public void receive(Transmission transmission) {
-        //Normal way of receiving
+    public void sendTransmission(IChannel channel, Transmission transmission) {
+        channel.startTransmission(transmission);
     }
+
+    @Subscribe
+    public abstract void receive(Transmission transmission);
 }

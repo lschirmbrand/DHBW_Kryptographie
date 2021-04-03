@@ -1,13 +1,19 @@
 package network;
 
+import java.util.List;
+
 public interface INetwork {
-    void createChannel(String name, Participant a, Participant b);
+    void addChannel(String name, Participant a, Participant b);
 
     void removeChannel(String name);
 
-    void addIntruderToChannel(String name, Participant intruder);
+    IChannel getChannel(String name);
 
-    void sendTransmission(String name, Transmission transmission);
+    List<IChannel> getChannels();
+
+    void addParticipant(String name, String type);
 
     Participant getParticipant(String name);
+
+    void intrudeChannel(String name, ParticipantIntruder intruder);
 }
