@@ -1,5 +1,3 @@
-import database.HSQLDB;
-import database.HSQLDBService;
 import gui.GUI;
 
 public class Application {

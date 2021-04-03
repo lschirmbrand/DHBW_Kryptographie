@@ -140,7 +140,6 @@ public enum HSQLDBService implements IDBService {
         long timeStamp = Instant.now().getEpochSecond();
         StringBuilder sqlStringBuilder = new StringBuilder();
         sqlStringBuilder.append("INSERT INTO postbox_").append(participantReceiver).append(" (participant_from_id, message, timestamp)");
-        sqlStringBuilder.append("");
         sqlStringBuilder.append(MessageFormat.format(" VALUES ({0}, ''{1}'', {2})",
                 participantFromID, message, Long.toString(timeStamp)));
         System.out.println("SQL-Statement Builder: " + sqlStringBuilder.toString());

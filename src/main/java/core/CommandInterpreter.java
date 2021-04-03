@@ -2,9 +2,6 @@ package core;
 
 import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
-import network.Participant;
-import network.ParticipantDefault;
-import network.ParticipantIntruder;
 
 import java.util.ArrayList;
 import java.util.List;
