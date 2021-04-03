@@ -79,8 +79,4 @@ public class Controller {
                 .forEach(securityAgency.getInterpreter()::interpret);
 
     }
-
-    public boolean isLoggingEnabled() {
-        return true;
-    }
 }

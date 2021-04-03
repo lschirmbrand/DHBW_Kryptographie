@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class CommandInterpreter {
     private final SecurityAgency securityAgency;
-    Map<String, Consumer<List<String>>> regexMap;
+    private final Map<String, Consumer<List<String>>> regexMap;
 
     public CommandInterpreter(SecurityAgency securityAgency) {
         this.securityAgency = securityAgency;

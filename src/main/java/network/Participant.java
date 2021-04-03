@@ -10,10 +10,6 @@ public abstract class Participant {
         this.name = name;
     }
 
-    public boolean isTransmissionReceiver(Transmission transmission) {
-        return this.name.equals(transmission.getReceiver());
-    }
-
     public String getName() {
         return name;
     }

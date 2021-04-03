@@ -4,21 +4,14 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 
-//-------------------
-//  Author: 4775194
-//-------------------
-
-
 public class ShiftBase {
     // static instance
     private static final ShiftBase instance = new ShiftBase();
 
     // port
-    public Port port;
+    public final Port port;
 
     int key;
-    String plainMessage;
-    String encryptedMessage;
 
     // private constructor
     private ShiftBase() {
@@ -31,10 +24,6 @@ public class ShiftBase {
     }
 
     // inner methods
-    public String innerVersion() {
-        return "ShiftBase";
-    }
-
 
     //Encrypt Message with Key from JSON File
     private String innerEncrypt(String plainMessage, File keyfile) {
@@ -125,11 +114,6 @@ public class ShiftBase {
 
     // inner class port
     public class Port implements IShiftBase {
-        @Override
-        public String version() {
-            return innerVersion();
-        }
-
         @Override
         public String encrypt(String plainMessage, File keyfile) {
             return innerEncrypt(plainMessage.toLowerCase(), keyfile);

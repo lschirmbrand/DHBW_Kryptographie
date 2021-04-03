@@ -71,7 +71,7 @@ public class GUI extends Application {
     private void keyPressed(KeyCode keyCode) {
         switch (keyCode) {
             case F3:
-                if (guiController.isLoggingEnabled()) {
+                if (Configuration.instance.debugMode) {
                     guiController.disableDebug();
                 } else {
                     guiController.enableDebug();
@@ -88,10 +88,6 @@ public class GUI extends Application {
         }
     }
 
-    public String getOutputText() {
-        return outputArea.getText();
-    }
-
     public void setOutputText(String text) {
         if (!outputArea.getText().isBlank()) {
             outputArea.appendText(Configuration.instance.lineSeparator + text);
@@ -99,9 +95,5 @@ public class GUI extends Application {
             outputArea.appendText(text);
         }
         outputArea.positionCaret(outputArea.getLength());
-    }
-
-    public void clearText() {
-        outputArea.setText("");
     }
 }

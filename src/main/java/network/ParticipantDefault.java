@@ -10,7 +10,7 @@ public class ParticipantDefault extends Participant {
 
     @Override
     public void receive(Transmission transmission) {
-        if (!isTransmissionReceiver(transmission)) {
+        if (!transmission.getSender().equals(getName())) {
             String decrypted = Encryption.decrypt(transmission.getMessage(), transmission.getAlgorithm(), transmission.getKeyFilePath());
             Configuration.instance.guiLogger.log(getName() + " received new message: " + decrypted);
         }

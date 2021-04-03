@@ -1,11 +1,8 @@
 package database;
 
 import database.models.Channel;
-import database.models.Message;
 import database.models.Participant;
-import database.models.PostboxMessage;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -17,17 +14,10 @@ public enum HSQLDBService implements IDBService {
     instance;
 
     private final HSQLDB db = HSQLDB.instance;
-    private Connection conn;
 
     @Override
     public void setup() {
         db.setupDatabase();
-        this.conn = db.getConnection();
-    }
-
-    @Override
-    public void shutdown() {
-        db.shutdown();
     }
 
     @Override
@@ -81,12 +71,6 @@ public enum HSQLDBService implements IDBService {
     }
 
     @Override
-    public void insertMessage(Message message) {
-        insertMessage(message.getParticipantSender(), message.getParticipantReceiver(),
-                message.getAlgorithm(), message.getKeyfile(), message.getPlainMessage(), message.getEncryptedMessage());
-    }
-
-    @Override
     public void insertParticipant(String name, String type) {
 
         // insert type if not exists
@@ -109,11 +93,6 @@ public enum HSQLDBService implements IDBService {
     }
 
     @Override
-    public void insertParticipant(Participant participant) {
-        insertParticipant(participant.getName(), participant.getType());
-    }
-
-    @Override
     public void insertChannel(String name, String participantA, String participantB) {
         name = name.toLowerCase();
         int participantA_ID = getParticipantID(participantA);
@@ -123,12 +102,6 @@ public enum HSQLDBService implements IDBService {
         sqlStringBuilder.append(MessageFormat.format(" VALUES (''{0}'',{1},{2})", name, participantA_ID, participantB_ID));
         System.out.println("SQL-Statement Builder: " + sqlStringBuilder.toString());
         db.update(sqlStringBuilder.toString());
-    }
-
-    @Override
-    public void insertChannel(Channel channel) {
-        insertChannel(channel.getName(), channel.getParticipantA().getName(),
-                channel.getParticipantB().getName());
     }
 
     @Override
@@ -145,13 +118,6 @@ public enum HSQLDBService implements IDBService {
         System.out.println("SQL-Statement Builder: " + sqlStringBuilder.toString());
         db.update(sqlStringBuilder.toString());
     }
-
-    @Override
-    public void insertPostboxMessage(PostboxMessage postboxMessage) {
-        insertPostboxMessage(postboxMessage.getParticipantReceiver().getName(),
-                postboxMessage.getParticipantSender().getName(), postboxMessage.getMessage());
-    }
-
 
     @Override
     public List<String> getAlgorithms() {
@@ -221,52 +187,6 @@ public enum HSQLDBService implements IDBService {
     }
 
     @Override
-    public List<PostboxMessage> getPostboxMessages(String participant) {
-        List<PostboxMessage> msgList = new ArrayList<>();
-        if (!participantExists(participant)) {
-            System.out.println("Couldn't get postbox message, participant wasn't found.");
-        }
-        try {
-            ResultSet resultSet = db.select("SELECT * from POSTBOX_" + participant);
-            while (resultSet.next()) {
-                int partFromID = resultSet.getInt("participant_from_id");
-                String partFromName = getParticipantName(partFromID);
-                Participant partFrom = new Participant(partFromName, getOneParticipantType(partFromName));
-                Participant partTo = new Participant(participant, getOneParticipantType(participant));
-                String timestamp = Integer.toString(resultSet.getInt("timestamp"));
-                String message = resultSet.getString("message");
-                PostboxMessage pbM = new PostboxMessage(partFrom, partTo, message, timestamp);
-                msgList.add(pbM);
-            }
-        } catch (SQLException sqlException) {
-            System.out.println(sqlException.getMessage());
-        }
-        return msgList;
-    }
-
-    @Override
-    public Channel getOneChannel(String participantA, String participantB) {
-        int partAID = getParticipantID(participantA);
-        int partBID = getParticipantID(participantB);
-        String sqlStatement = MessageFormat.format(
-                "SELECT name from channel where (participant_01=''{0}'' AND participant_02=''{1}'') or (participant_01=''{1}'' AND participant_02=''{0}'')",
-                partAID, partBID);
-        String channelName;
-        try {
-            ResultSet resultSet = db.select(sqlStatement);
-            if (!resultSet.next()) {
-                throw new SQLException("No channel found with participants: " + participantA + " & " + participantB);
-            }
-            channelName = resultSet.getString("name");
-
-            return new Channel(channelName, getOneParticipant(participantA), getOneParticipant(participantB));
-        } catch (SQLException sqlException) {
-            System.out.println(sqlException.getMessage());
-        }
-        return null;
-    }
-
-    @Override
     public String getOneParticipantType(String participantName) {
         if (participantName == null) return null;
         participantName = participantName.toLowerCase();
@@ -292,21 +212,6 @@ public enum HSQLDBService implements IDBService {
             return new Participant(participantName, getOneParticipantType(participantName));
         }
         return null;
-    }
-
-    @Override
-    public boolean channelExists(String channelName) {
-        try {
-            String sqlStatement = "SELECT name from channel where LOWER(name)='" + channelName.toLowerCase() + "'";
-            ResultSet resultSet = db.select(sqlStatement);
-            if (!resultSet.next()) {
-                throw new SQLException(channelName + " channel wasn't found");
-            }
-            return true;
-        } catch (SQLException sqlException) {
-            System.out.println(sqlException.getMessage());
-        }
-        return false;
     }
 
     @Override

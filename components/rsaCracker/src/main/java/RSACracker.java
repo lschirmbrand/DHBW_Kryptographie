@@ -8,13 +8,11 @@ import java.util.*;
 //-------------------
 
 public class RSACracker {
-    private static RSACracker instance = new RSACracker();
-
+    private final static RSACracker instance = new RSACracker();
+    public final Port port;
     private BigInteger e = BigInteger.ZERO;
     private BigInteger n = BigInteger.ZERO;
-
     private Date start;
-    public Port port;
 
     private RSACracker() {
         port = new Port();
@@ -22,17 +20,6 @@ public class RSACracker {
 
     public static RSACracker getInstance() {
         return instance;
-    }
-
-    public class Port implements IRSACracker {
-        @Override
-        public String version() {
-            return null;
-        }
-
-        public String decrypt(String encryptedMessage, File publicKeyfile) throws FileNotFoundException, RSACrackingTimeoutException {
-            return decryptMessage(encryptedMessage, publicKeyfile);
-        }
     }
 
     private String decryptMessage(String encryptedMessage, File publicKeyfile) throws FileNotFoundException, RSACrackingTimeoutException {
@@ -98,7 +85,7 @@ public class RSACracker {
         return cipher.modPow(d, n);
     }
 
-    public List<BigInteger> factorize(BigInteger n) throws RSACrackingException, RSACrackingTimeoutException {
+    public List<BigInteger> factorize(BigInteger n) throws RSACrackingTimeoutException {
         BigInteger two = BigInteger.valueOf(2);
         List<BigInteger> factorList = new LinkedList<>();
 
@@ -136,6 +123,12 @@ public class RSACracker {
     private void checkMaxTime() throws RSACrackingTimeoutException {
         if ((new Date().getTime() - start.getTime()) / 1000 > 30) {
             throw new RSACrackingTimeoutException();
+        }
+    }
+
+    public class Port implements IRSACracker {
+        public String decrypt(String encryptedMessage, File publicKeyfile) throws FileNotFoundException, RSACrackingTimeoutException {
+            return decryptMessage(encryptedMessage, publicKeyfile);
         }
     }
 }

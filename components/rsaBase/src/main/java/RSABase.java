@@ -10,8 +10,8 @@ import java.util.Scanner;
 //-------------------
 
 public class RSABase {
-    private static RSABase instance = new RSABase();
-    public Port port;
+    private final static RSABase instance = new RSABase();
+    public final Port port;
     private Key key;
 
     private RSABase() {
@@ -118,11 +118,6 @@ public class RSABase {
     }
 
     public class Port implements IRSABase {
-        @Override
-        public String version() {
-            return null;
-        }
-
         @Override
         public String encrypt(String plainMessage, File publicKeyfile) throws FileNotFoundException {
             return encryptMessage(plainMessage, publicKeyfile);

@@ -11,8 +11,6 @@ public interface IDBService {
 
     void setup();
 
-    void shutdown();
-
     void dropChannel(String channelName);
 
     // Inserts
@@ -23,17 +21,9 @@ public interface IDBService {
 
     void insertMessage(String participantSender, String participantReceiver, String algorithm, String keyFile, String plainMessage, String encryptedMessage);
 
-    void insertMessage(Message message);
-
     void insertParticipant(String name, String type);
 
-    void insertParticipant(Participant participant);
-
-    void insertChannel(Channel channel);
-
     void insertChannel(String name, String participantA, String participantB);
-
-    void insertPostboxMessage(PostboxMessage postboxMessage);
 
     void insertPostboxMessage(String participantSender, String participantReceiver, String message);
 
@@ -48,18 +38,12 @@ public interface IDBService {
 
     List<Channel> getChannels();
 
-    List<PostboxMessage> getPostboxMessages(String participant);
-
-    Channel getOneChannel(String participantA, String participantB);
-
     String getOneParticipantType(String participantName);
 
     Participant getOneParticipant(String participantName);
 
 
     // Check for existence
-
-    boolean channelExists(String channelName);
 
     boolean participantExists(String name);
 }

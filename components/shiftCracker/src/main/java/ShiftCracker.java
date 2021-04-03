@@ -1,5 +1,3 @@
-
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +10,7 @@ public class ShiftCracker {
     private static final ShiftCracker instance = new ShiftCracker();
 
     // port
-    public Port port;
-
-    int key;
-
-    private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00000");
+    public final Port port;
 
     // private constructor
     private ShiftCracker() {
@@ -29,10 +23,6 @@ public class ShiftCracker {
     }
 
     // inner methods
-    public String innerVersion() {
-        return "ShiftCracker";
-    }
-
 
     //Decrypt Message with Key from JSON File
     private String innerDecrypt(String encryptedMessage) {
@@ -61,11 +51,9 @@ public class ShiftCracker {
 
         List<String> possibilities = new ArrayList<>();
 
-        StringBuilder sb = new StringBuilder();
-
         for (int shift = 1; shift <= 25; shift++) {
             String possibility = smartShift(shift, unicode, unicodeCopy);
-            if(!possibility.equals("")) {
+            if (!possibility.equals("")) {
                 possibilities.add(possibility);
             }
         }
@@ -73,23 +61,7 @@ public class ShiftCracker {
         return String.join("\n   | ", possibilities);
     }
 
-
-    // inner class port
-    public class Port implements IShiftCracker {
-        @Override
-        public String version() {
-            return innerVersion();
-        }
-
-        @Override
-        public String decrypt(String encryptedMessage) {
-            return innerDecrypt(encryptedMessage);
-        }
-
-    }
-
-
-    private static String smartShift(int shift, int[] unicode, int[] unicodeCopy) {
+    private String smartShift(int shift, int[] unicode, int[] unicodeCopy) {
         for (int x = 0; x <= unicode.length - 1; x++) {
             unicodeCopy[x] = unicode[x];
 
@@ -150,13 +122,16 @@ public class ShiftCracker {
 
         if (eFrequency / frequency >= 0.05 || aFrequency / frequency >= 0.05 || iFrequency / frequency >= 0.05 || oFrequency / frequency >= 0.05 || uFrequency / frequency >= 0.05) {
             return (stringBuilder.toString().toLowerCase());
-            //System.out.println("\t\tA : " + decimalFormat.format(aFrequency / frequency));
-            //System.out.println("\t\tE : " + decimalFormat.format(eFrequency / frequency));
-            //System.out.println("\t\tI : " + decimalFormat.format(iFrequency / frequency));
-            //System.out.println("\t\tO : " + decimalFormat.format(oFrequency / frequency));
-            //System.out.println("\t\tU : " + decimalFormat.format(uFrequency / frequency));
         }
 
         return "";
+    }
+
+    // inner class port
+    public class Port implements IShiftCracker {
+        @Override
+        public String decrypt(String encryptedMessage) {
+            return innerDecrypt(encryptedMessage);
+        }
     }
 }

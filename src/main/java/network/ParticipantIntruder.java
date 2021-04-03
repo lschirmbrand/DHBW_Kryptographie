@@ -11,7 +11,7 @@ public class ParticipantIntruder extends Participant {
 
     @Override
     public void receive(Transmission transmission) {
-        if (!isTransmissionReceiver(transmission)) {
+        if (!transmission.getSender().equals(getName())) {
             try {
                 String decrypted = switch (transmission.getAlgorithm()) {
                     case RSA -> Encryption.crackRSA(transmission.getMessage(), transmission.getKeyFilePath());

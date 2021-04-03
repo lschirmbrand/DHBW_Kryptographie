@@ -46,7 +46,7 @@ public abstract class JarFactory {
             try {
                 URL[] urls = {new File(archivePath).toURI().toURL()};
                 URLClassLoader urlClassLoader = new URLClassLoader(urls, BaseFactory.class.getClassLoader());
-                Class clazz = Class.forName(className, true, urlClassLoader);
+                Class<?> clazz = Class.forName(className, true, urlClassLoader);
                 Object instance = clazz.getMethod("getInstance").invoke(null);
                 port = clazz.getDeclaredField("port").get(instance);
 

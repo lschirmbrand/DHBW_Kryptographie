@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 public class GUILogger {
 
-    Consumer<String> logFunction;
+    private final Consumer<String> logFunction;
 
     public GUILogger(Consumer<String> logFunction) {
         this.logFunction = logFunction;

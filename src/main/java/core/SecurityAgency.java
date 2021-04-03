@@ -19,9 +19,6 @@ public class SecurityAgency {
 
     private final IDBService dbService;
 
-//    private final Map<String, Participant> participants;
-//    private final Map<String, EventBus> channels;
-
     private final INetwork network;
 
     public SecurityAgency() {
@@ -31,8 +28,6 @@ public class SecurityAgency {
 
         network = new Network();
 
-//        participants = new HashMap<>();
-//        channels = new HashMap<>();
         setupParticipants();
         setupChannels();
     }
@@ -180,9 +175,7 @@ public class SecurityAgency {
 
         a.sendTransmission(channel, new Transmission(a.getName(), b.getName(), encryptedMessage, algorithm, keyfileName));
 
-        Message dbMessage = new Message(a.getName(), b.getName(), algorithm.name().toLowerCase(), keyfileName, new Date().toString(), message, encryptedMessage);
-
-        dbService.insertMessage(dbMessage);
+        dbService.insertMessage(a.getName(), b.getName(), algorithm.name().toLowerCase(), keyfileName, message, encryptedMessage);
 
         return "";
     }
