@@ -58,13 +58,13 @@ public class Controller {
         }
     }
 
-    public void disableDebug() {
+    public void enableDebug() {
         displayText("-------------------------------");
         displayText("Debug-Mode turned: On");
         Configuration.instance.debugMode = true;
     }
 
-    public void enableDebug() {
+    public void disableDebug() {
         displayText("-------------------------------");
         displayText("Debug-Mode turned: Off");
         Configuration.instance.debugMode = false;
