@@ -8,7 +8,7 @@ decrypt message "fkmmsxo pyb myfsn sc cdybon sx lesvnsxq klm" using shift and ke
 crack encrypted message "fkmmsxo pyb myfsn sc cdybon sx lesvnsxq klm" using shift
 ```
 ```
-encrypt message "test " using rsa and keyfile rsa32.json
+encrypt message "test" using rsa and keyfile rsa32.json
 decrypt message "fS0zIA==" using rsa and keyfile rsa32.json
 crack encrypted message "fS0zIA" using rsa and keyfile rsa32.json
 ```
