@@ -3,9 +3,7 @@ package core.encryption;
 import configuration.Configuration;
 import configuration.EncryptionAlgorithm;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
@@ -19,9 +17,7 @@ public class Encryption {
 
         File keyFile = new File(Configuration.instance.commonPathToKeyFile + keyFilename);
 
-        if (Configuration.instance.debugMode) {
-            switchSystemOut(false, algorithm);
-        }
+        switchSystemOut(false, algorithm);
 
         String res;
         try {
@@ -32,10 +28,8 @@ public class Encryption {
             e.printStackTrace();
             res = "Error while encrypting";
         }
-        if (Configuration.instance.debugMode) {
 
-            resetSystemOut();
-        }
+        restoreSystemOut();
         return res;
     }
 
@@ -56,7 +50,7 @@ public class Encryption {
             res = "Error while encrypting";
         }
         if (Configuration.instance.debugMode) {
-            resetSystemOut();
+            restoreSystemOut();
         }
         return res;
     }
@@ -91,20 +85,29 @@ public class Encryption {
 
 
     private static void switchSystemOut(boolean decrypt, EncryptionAlgorithm algorithm) {
-        File logDir = new File(Configuration.instance.logsDirectory);
-        if (!logDir.exists()) {
-            logDir.mkdirs();
-        }
+        if (Configuration.instance.debugMode) {
+            File logDir = new File(Configuration.instance.logsDirectory);
+            if (!logDir.exists()) {
+                logDir.mkdirs();
+            }
 
-        String fileName = Configuration.instance.logsDirectory + (decrypt ? "decrypt_" : "encrypt_") + algorithm.name().toLowerCase() + "_" + new Date().getTime() + ".txt";
-        try {
-            System.setOut(new PrintStream(fileName));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            String fileName = Configuration.instance.logsDirectory + (decrypt ? "decrypt_" : "encrypt_") + algorithm.name().toLowerCase() + "_" + new Date().getTime() + ".txt";
+            try {
+                System.setOut(new PrintStream(fileName));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // suppress logging if not in debug mode
+            System.setOut(new PrintStream(new OutputStream() {
+                @Override
+                public void write(int b) throws IOException {
+                }
+            }));
         }
     }
 
-    private static void resetSystemOut() {
+    private static void restoreSystemOut() {
         System.setOut(consoleOut);
     }
 }
