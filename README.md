@@ -1,5 +1,9 @@
 # DHBW_Kryptographie
 
+Aufgabe aus dem vierten Semester der DHBW Mosbach, Studiengang Angewandte Informatik im Fach Kryptographie. Dieses Repository darf als Inspiration für nachfolgende Studenten verstanden werden.
+
+Aufgabenstellung ist im Repository zu finden.
+
 ## Commands for testing
 
 ```
